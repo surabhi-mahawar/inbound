@@ -50,7 +50,6 @@ public class NetcoreWhatsappConverter {
 
         netcoreWhatsappAdapter = NetcoreWhatsappAdapter.builder()
                 .botservice(botService)
-                .xmsgRepo(xmsgRepo)
                 .build();
 
         XMsgProcessingUtil.builder()
