@@ -48,7 +48,7 @@ public class GupShupWhatsappConverter {
         BotService botService = new BotService();
         gupShupWhatsappAdapter = GupShupWhatsappAdapter.builder()
                 .botservice(botService)
-                .xmsgRepository(xmsgRepository)
+                .xmsgRepo(xmsgRepository)
                 .build();
 
         XMsgProcessingUtil.builder()
