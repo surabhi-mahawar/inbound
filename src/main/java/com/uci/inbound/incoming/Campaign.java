@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.bind.JAXBException;
+import java.util.function.Function;
 
 @Slf4j
 @CrossOrigin
@@ -49,10 +50,11 @@ public class Campaign {
     public TrackDetails getCampaignStatus(@RequestParam("campaignId") String campaignId) {
         CdacBulkSmsAdapter iprovider = (CdacBulkSmsAdapter) factoryProvider.getProvider("cdac", "SMS");
         try {
-            return iprovider.getLastTrackingReport(campaignId);
+             iprovider.getLastTrackingReport(campaignId).map(trackDetails -> trackDetails);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
+        return null;
     }
 }

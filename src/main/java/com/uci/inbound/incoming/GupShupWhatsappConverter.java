@@ -40,7 +40,7 @@ public class GupShupWhatsappConverter {
     public CommonProducer kafkaProducer;
 
     @Autowired
-    public XMessageRepository xmsgRepo;
+    public XMessageRepository xmsgRepository;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void gupshupWhatsApp(@Valid GSWhatsAppMessage message) throws JsonProcessingException, JAXBException {
@@ -48,12 +48,12 @@ public class GupShupWhatsappConverter {
         BotService botService = new BotService();
         gupShupWhatsappAdapter = GupShupWhatsappAdapter.builder()
                 .botservice(botService)
-                .xmsgRepo(xmsgRepo)
+                .xmsgRepository(xmsgRepository)
                 .build();
 
         XMsgProcessingUtil.builder()
                 .adapter(gupShupWhatsappAdapter)
-                .xMsgRepo(xmsgRepo)
+                .xMsgRepo(xmsgRepository)
                 .inboundMessage(message)
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
