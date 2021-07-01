@@ -1,8 +1,8 @@
 package com.uci.inbound.cdac;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.adapter.cdac.CdacBulkSmsAdapter;
-import com.samagra.adapter.Request.CommonMessage;
+import com.uci.adapter.cdac.CdacBulkSmsAdapter;
+import com.uci.adapter.Request.CommonMessage;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.CommonProducer;

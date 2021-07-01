@@ -1,8 +1,8 @@
 package com.uci.inbound.diksha.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.adapter.sunbird.web.SunbirdWebPortalAdapter;
-import com.samagra.adapter.sunbird.web.inbound.DikshaWebMessageFormat;
+import com.uci.adapter.sunbird.web.SunbirdWebPortalAdapter;
+import com.uci.adapter.sunbird.web.inbound.DikshaWebMessageFormat;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;

@@ -1,8 +1,8 @@
 package com.uci.inbound.netcore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.adapter.netcore.whatsapp.inbound.NetcoreMessageFormat;
-import com.samagra.adapter.netcore.whatsapp.NetcoreWhatsappAdapter;
+import com.uci.adapter.netcore.whatsapp.inbound.NetcoreMessageFormat;
+import com.uci.adapter.netcore.whatsapp.NetcoreWhatsappAdapter;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.CommonProducer;

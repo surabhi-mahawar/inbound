@@ -3,7 +3,7 @@ package com.uci.inbound.incoming;
 import javax.validation.Valid;
 import javax.xml.bind.JAXBException;
 
-import com.samagra.adapter.gs.whatsapp.GupShupWhatsappAdapter;
+import com.uci.adapter.gs.whatsapp.GupShupWhatsappAdapter;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
 import com.uci.inbound.utils.XMsgProcessingUtil;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.adapter.gs.whatsapp.GSWhatsAppMessage;
+import com.uci.adapter.gs.whatsapp.GSWhatsAppMessage;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,7 +1,7 @@
 package com.uci.inbound.incoming;
 
 
-import com.samagra.adapter.provider.factory.ProviderFactory;
+import com.uci.adapter.provider.factory.ProviderFactory;
 import com.uci.utils.CommonProducer;
 import io.fusionauth.domain.User;
 import lombok.extern.slf4j.Slf4j;

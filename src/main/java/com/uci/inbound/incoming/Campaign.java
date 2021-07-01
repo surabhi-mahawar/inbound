@@ -2,9 +2,9 @@ package com.uci.inbound.incoming;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.adapter.cdac.CdacBulkSmsAdapter;
-import com.samagra.adapter.cdac.TrackDetails;
-import com.samagra.adapter.provider.factory.ProviderFactory;
+import com.uci.adapter.cdac.CdacBulkSmsAdapter;
+import com.uci.adapter.cdac.TrackDetails;
+import com.uci.adapter.provider.factory.ProviderFactory;
 import com.uci.utils.CommonProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.xml.bind.JAXBException;
-import java.util.function.Function;
 
 @Slf4j
 @CrossOrigin
@@ -50,7 +49,7 @@ public class Campaign {
     public TrackDetails getCampaignStatus(@RequestParam("campaignId") String campaignId) {
         CdacBulkSmsAdapter iprovider = (CdacBulkSmsAdapter) factoryProvider.getProvider("cdac", "SMS");
         try {
-             iprovider.getLastTrackingReport(campaignId).map(trackDetails -> trackDetails);
+             iprovider.getLastTrackingReport(campaignId);
         } catch (Exception e) {
             e.printStackTrace();
             return null;

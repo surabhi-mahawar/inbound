@@ -2,8 +2,8 @@ package com.uci.inbound.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.samagra.adapter.provider.factory.AbstractProvider;
-import com.samagra.adapter.Request.CommonMessage;
+import com.uci.adapter.provider.factory.AbstractProvider;
+import com.uci.adapter.Request.CommonMessage;
 import com.uci.dao.models.XMessageDAO;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.dao.utils.XMessageDAOUtills;
