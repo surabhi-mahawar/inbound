@@ -1,17 +1,16 @@
 package com.samagra.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.samagra.Publisher.CommonProducer;
 import com.samagra.adapter.provider.factory.AbstractProvider;
 import com.samagra.common.Request.CommonMessage;
+import com.uci.dao.models.XMessageDAO;
+import com.uci.dao.repository.XMessageRepository;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import messagerosa.core.model.XMessage;
-import messagerosa.dao.XMessageDAO;
-import messagerosa.dao.XMessageDAOUtills;
-import messagerosa.dao.XMessageRepo;
+import com.uci.dao.utils.XMessageDAOUtills;
 
 import javax.xml.bind.JAXBException;
 import java.util.List;
@@ -24,7 +23,7 @@ public class XMsgProcessingUtil {
     AbstractProvider adapter;
     CommonMessage inboundMessage;
     CommonProducer kafkaProducer;
-    XMessageRepo xMsgRepo;
+    XMessageRepository xMsgRepo;
     String topicSuccess;
     String topicFailure;
 
@@ -41,19 +40,44 @@ public class XMsgProcessingUtil {
                         String whatsappId;
                         if (!xmsg.getMessageState().equals(XMessage.MessageState.REPLIED)) {
                             whatsappId   = xmsg.getMessageId().getChannelMessageId();
-                            List<XMessageDAO> xDbs = xMsgRepo.findAllByFromIdAndMessageStateOrderByTimestamp(xmsg.getFrom().getUserID(), XMessage.MessageState.REPLIED.name());
+                                    xMsgRepo.findAllByFromIdAndMessageStateOrderByTimestamp(xmsg.getFrom().getUserID(),
+                                            XMessage.MessageState.REPLIED.name()).subscribe(new Consumer<List<XMessageDAO>>() {
+                                        @Override
+                                        public void accept(List<XMessageDAO> xDbs) {
 
-                            if (xDbs.size() > 0) {
-                                log.info("last replied message {}",xDbs.get(0));
-                                XMessageDAO prevMsg = xDbs.get(0);
-                                prevMsg.setMessageId(whatsappId);
-                                xMsgRepo.save(prevMsg);
-                            }
+                                            if (xDbs.size() > 0) {
+                                                log.info("last replied message {}",xDbs.get(0));
+                                                XMessageDAO prevMsg = xDbs.get(0);
+                                                prevMsg.setMessageId(whatsappId);
+                                                xMsgRepo.save(prevMsg);
+                                            }
+                                            xMsgRepo.save(dao);
+                                            String xmessage = null;
+                                            try {
+                                                xmessage = xmsg.toXML();
+                                            } catch (JAXBException e) {
+                                                try {
+                                                    kafkaProducer.send(topicFailure, inboundMessage.toString());
+                                                } catch (JsonProcessingException jsonProcessingException) {
+                                                    jsonProcessingException.printStackTrace();
+                                                }
+                                            }
+                                            log.info("xml {}", xmessage);
+                                            try {
+                                                kafkaProducer.send(topicSuccess, xmessage);
+                                            } catch (JsonProcessingException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+
+                        }else{
+                            xMsgRepo.save(dao);
+                            String xmessage = xmsg.toXML();
+                            log.info("xml {}", xmessage);
+                            kafkaProducer.send(topicSuccess, xmessage);
                         }
-                        xMsgRepo.save(dao);
-                        String xmessage = xmsg.toXML();
-                        log.info("xml {}", xmessage);
-                        kafkaProducer.send(topicSuccess, xmessage);
+
                     }catch (JAXBException | JsonProcessingException e) {
                         log.info("exception message {}", e.getMessage());
                         try {
