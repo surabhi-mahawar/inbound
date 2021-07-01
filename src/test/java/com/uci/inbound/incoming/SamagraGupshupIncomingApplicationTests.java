@@ -1,4 +1,4 @@
-package com.samagra.gupshup.incoming;
+package com.uci.inbound.incoming;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

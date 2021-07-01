@@ -1,14 +1,12 @@
-package com.samagra.cdac;
+package com.uci.inbound.cdac;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.Publisher.CommonProducer;
 import com.samagra.adapter.cdac.CdacBulkSmsAdapter;
-import com.samagra.adapter.gs.whatsapp.GSWhatsAppMessage;
-import com.samagra.adapter.gs.whatsapp.GupShupWhatsappAdapter;
-import com.samagra.common.Request.CommonMessage;
-import com.samagra.utils.XMsgProcessingUtil;
+import com.samagra.adapter.Request.CommonMessage;
+import com.uci.inbound.utils.XMsgProcessingUtil;
+import com.uci.dao.repository.XMessageRepository;
+import com.uci.utils.CommonProducer;
 import lombok.extern.slf4j.Slf4j;
-import messagerosa.dao.XMessageRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import javax.xml.bind.JAXBException;
 
 @Slf4j
 @CrossOrigin
@@ -44,7 +41,7 @@ public class CDACConverter {
     public CommonProducer kafkaProducer;
 
     @Autowired
-    public XMessageRepo xmsgRepo;
+    public XMessageRepository xmsgRepo;
 
     @RequestMapping(value = "/sms/bulk/", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void cdacBulk(@Valid CommonMessage message) throws JsonProcessingException {

@@ -1,11 +1,11 @@
-package com.samagra.gupshup.incoming;
+package com.uci.inbound.incoming;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.Publisher.CommonProducer;
 import com.samagra.adapter.cdac.CdacBulkSmsAdapter;
 import com.samagra.adapter.cdac.TrackDetails;
 import com.samagra.adapter.provider.factory.ProviderFactory;
+import com.uci.utils.CommonProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

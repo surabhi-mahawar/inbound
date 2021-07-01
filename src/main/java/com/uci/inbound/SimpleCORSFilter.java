@@ -1,4 +1,4 @@
-package com.samagra;
+package com.uci.inbound;
 
 import java.io.IOException;
 import javax.servlet.Filter;

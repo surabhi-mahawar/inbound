@@ -1,12 +1,13 @@
-package com.samagra.gupshup.incoming;
+package com.uci.inbound.incoming;
 
 import javax.validation.Valid;
 import javax.xml.bind.JAXBException;
 
 import com.samagra.adapter.gs.whatsapp.GupShupWhatsappAdapter;
+import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
-import com.samagra.utils.XMsgProcessingUtil;
-import messagerosa.dao.XMessageRepo;
+import com.uci.inbound.utils.XMsgProcessingUtil;
+import com.uci.utils.CommonProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.Publisher.CommonProducer;
 import com.samagra.adapter.gs.whatsapp.GSWhatsAppMessage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,7 @@ public class GupShupWhatsappConverter {
     public CommonProducer kafkaProducer;
 
     @Autowired
-    public XMessageRepo xmsgRepo;
+    public XMessageRepository xmsgRepo;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void gupshupWhatsApp(@Valid GSWhatsAppMessage message) throws JsonProcessingException, JAXBException {

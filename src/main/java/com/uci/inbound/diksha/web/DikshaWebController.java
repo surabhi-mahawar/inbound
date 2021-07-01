@@ -1,13 +1,13 @@
-package com.samagra.netcore;
+package com.uci.inbound.diksha.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.Publisher.CommonProducer;
-import com.samagra.adapter.netcore.whatsapp.inbound.NetcoreMessageFormat;
-import com.samagra.adapter.netcore.whatsapp.NetcoreWhatsappAdapter;
-import com.samagra.utils.XMsgProcessingUtil;
-import lombok.extern.slf4j.Slf4j;
-import messagerosa.dao.XMessageRepo;
+import com.samagra.adapter.sunbird.web.SunbirdWebPortalAdapter;
+import com.samagra.adapter.sunbird.web.inbound.DikshaWebMessageFormat;
+import com.uci.inbound.utils.XMsgProcessingUtil;
+import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
+import com.uci.utils.CommonProducer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -20,40 +20,36 @@ import javax.xml.bind.JAXBException;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/netcore")
-public class NetcoreWhatsappConverter {
+@RequestMapping(value = "/diksha")
+public class DikshaWebController {
 
     @Value("${inboundProcessed}")
     private String inboundProcessed;
 
-    @Value("${gupshup-opted-out}")
-    private String optedOut;
-
     @Value("${inbound-error}")
     private String inboundError;
 
-    private NetcoreWhatsappAdapter netcoreWhatsappAdapter;
+    private SunbirdWebPortalAdapter sunbirdWebPortalAdapter;
 
     @Autowired
     public CommonProducer kafkaProducer;
 
     @Autowired
-    public XMessageRepo xmsgRepo;
+    public XMessageRepository xmsgRepo;
 
     @Autowired
     public BotService botService;
 
-    @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void netcoreWhatsApp(@RequestBody NetcoreMessageFormat message) throws JsonProcessingException, JAXBException {
+    @RequestMapping(value = "/web", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public void dikshaWeb(@RequestBody DikshaWebMessageFormat message) throws JsonProcessingException, JAXBException {
 
         System.out.println(message.toString());
 
-        netcoreWhatsappAdapter = NetcoreWhatsappAdapter.builder()
-                .botservice(botService)
+        sunbirdWebPortalAdapter = SunbirdWebPortalAdapter.builder()
                 .build();
 
         XMsgProcessingUtil.builder()
-                .adapter(netcoreWhatsappAdapter)
+                .adapter(sunbirdWebPortalAdapter)
                 .xMsgRepo(xmsgRepo)
                 .inboundMessage(message.getMessages()[0])
                 .topicFailure(inboundError)

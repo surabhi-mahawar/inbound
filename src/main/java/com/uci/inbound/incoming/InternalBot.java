@@ -1,23 +1,16 @@
-package com.samagra.gupshup.incoming;
+package com.uci.inbound.incoming;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.samagra.Publisher.CommonProducer;
-import com.samagra.adapter.cdac.CdacBulkSmsAdapter;
-import com.samagra.adapter.cdac.TrackDetails;
 import com.samagra.adapter.provider.factory.ProviderFactory;
+import com.uci.utils.CommonProducer;
 import io.fusionauth.domain.User;
 import lombok.extern.slf4j.Slf4j;
-import messagerosa.dao.XMessageDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
-import javax.xml.bind.JAXBException;
 
 @Slf4j
 @CrossOrigin
