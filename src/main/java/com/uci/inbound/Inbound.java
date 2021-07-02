@@ -13,15 +13,15 @@ import org.springframework.kafka.annotation.EnableKafka;
 @EnableReactiveCassandraRepositories("com.uci.dao")
 @EntityScan("com.uci.dao")
 @PropertySources({
-		@PropertySource("classpath:application-messagerosa.properties"),
-		@PropertySource("classpath:application.properties"),
-		@PropertySource("classpath:application-adapter.properties"),
-		@PropertySource("classpath:dao-application.properties"),
+        @PropertySource("classpath:application-messagerosa.properties"),
+        @PropertySource("classpath:application.properties"),
+        @PropertySource("classpath:application-adapter.properties"),
+        @PropertySource("classpath:dao-application.properties"),
 })
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.uci.inbound", "com.uci.adapter", "com.uci.utils"})
 public class Inbound {
-	public static void main(String[] args) {
-		SpringApplication.run(Inbound.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Inbound.class, args);
+    }
 }
