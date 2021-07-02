@@ -73,11 +73,11 @@ fabric.properties
 */.DS_Store
 samagra.gupshup.incoming.iml
 
-src/main/resources/application.properties
+#src/main/resources/application.properties
 
 target/
 .env
-*.properties
+#*.properties
 .mvn/
 .gradle/
 gradle
