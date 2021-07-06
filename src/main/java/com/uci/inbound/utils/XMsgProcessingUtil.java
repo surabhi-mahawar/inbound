@@ -34,7 +34,6 @@ public class XMsgProcessingUtil {
             adapter.convertMessageToXMsg(inboundMessage).subscribe(new Consumer<XMessage>() {
                 @Override
                 public void accept(XMessage xmsg) {
-                    try{
                         log.info("Converted");
                         XMessageDAO dao = XMessageDAOUtills.convertXMessageToDAO(xmsg);
                         String whatsappId;
@@ -49,18 +48,70 @@ public class XMsgProcessingUtil {
                                         log.info("last replied message {}",xDbs.get(0));
                                         XMessageDAO prevMsg = xDbs.get(0);
                                         prevMsg.setMessageId(whatsappId);
-                                        xMsgRepo.save(prevMsg);
+                                        xMsgRepo.insert(prevMsg).subscribe(new Consumer<XMessageDAO>() {
+                                            @Override
+                                            public void accept(XMessageDAO xMessageDAO) {
+                                                xMsgRepo.insert(dao).subscribe(new Consumer<XMessageDAO>() {
+                                                    @Override
+                                                    public void accept(XMessageDAO xMessageDAO) {
+                                                        String xmessage = null;
+                                                        try {
+                                                            xmessage = xmsg.toXML();
+                                                        } catch (JAXBException e) {
+                                                            try {
+                                                                kafkaProducer.send(topicFailure, inboundMessage.toString());
+                                                            } catch (JsonProcessingException jsonProcessingException) {
+                                                                jsonProcessingException.printStackTrace();
+                                                            }
+                                                        }
+                                                        log.info("xml {}", xmessage);
+                                                        try {
+                                                            kafkaProducer.send(topicSuccess, xmessage);
+                                                        } catch (JsonProcessingException e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                });
+
+                                            }
+                                        });
+
+                                    }else{
+                                        xMsgRepo.insert(dao).subscribe(new Consumer<XMessageDAO>() {
+                                            @Override
+                                            public void accept(XMessageDAO xMessageDAO) {
+                                                String xmessage = null;
+                                                try {
+                                                    xmessage = xmsg.toXML();
+                                                } catch (JAXBException e) {
+                                                    try {
+                                                        kafkaProducer.send(topicFailure, inboundMessage.toString());
+                                                    } catch (JsonProcessingException jsonProcessingException) {
+                                                        jsonProcessingException.printStackTrace();
+                                                    }
+                                                }
+                                                log.info("xml {}", xmessage);
+                                                try {
+                                                    kafkaProducer.send(topicSuccess, xmessage);
+                                                } catch (JsonProcessingException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
+
                                     }
-                                    xMsgRepo.save(dao);
+                                }
+                            });
+
+                        }else{
+                            xMsgRepo.insert(dao).subscribe(new Consumer<XMessageDAO>() {
+                                @Override
+                                public void accept(XMessageDAO xMessageDAO) {
                                     String xmessage = null;
                                     try {
                                         xmessage = xmsg.toXML();
                                     } catch (JAXBException e) {
-                                        try {
-                                            kafkaProducer.send(topicFailure, inboundMessage.toString());
-                                        } catch (JsonProcessingException jsonProcessingException) {
-                                            jsonProcessingException.printStackTrace();
-                                        }
+                                        e.printStackTrace();
                                     }
                                     log.info("xml {}", xmessage);
                                     try {
@@ -71,21 +122,9 @@ public class XMsgProcessingUtil {
                                 }
                             });
 
-                        }else{
-                            xMsgRepo.save(dao);
-                            String xmessage = xmsg.toXML();
-                            log.info("xml {}", xmessage);
-                            kafkaProducer.send(topicSuccess, xmessage);
                         }
 
-                    }catch (JAXBException | JsonProcessingException e) {
-                        log.info("exception message {}", e.getMessage());
-                        try {
-                            kafkaProducer.send(topicFailure, inboundMessage.toString());
-                        } catch (JsonProcessingException jsonProcessingException) {
-                            jsonProcessingException.printStackTrace();
-                        }
-                    }
+
 
 
                 }
