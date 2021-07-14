@@ -59,6 +59,7 @@ public class NetcoreWhatsappConverter {
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
+                .botService(botService)
                 .build()
                 .process();
     }
