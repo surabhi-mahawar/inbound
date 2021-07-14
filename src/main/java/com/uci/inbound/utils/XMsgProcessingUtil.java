@@ -36,34 +36,55 @@ public class XMsgProcessingUtil {
 
         log.info("incoming message {}", new ObjectMapper().writeValueAsString(inboundMessage));
         try {
-            adapter.convertMessageToXMsg(inboundMessage).subscribe(xmsg -> {
-                    log.info("Converted");
-                    XMessageDAO dao = XMessageDAOUtills.convertXMessageToDAO(xmsg);
-                    String whatsappId;
-                    if (!xmsg.getMessageState().equals(XMessage.MessageState.REPLIED)) {
-                        whatsappId  = xmsg.getMessageId().getChannelMessageId();
-                        getLatestXMessage(xmsg.getFrom().getUserID()).subscribe(new Consumer<XMessageDAO>() {
-                            @Override
-                            public void accept(XMessageDAO xMessageDAO) {
-                                if(xMessageDAO.getId() != null){
-                                    xMessageDAO.setMessageId(whatsappId);
-                                    xMsgRepo.insert(xMessageDAO).subscribe(xMessage -> xMsgRepo.insert(dao).subscribe(xMessageDAO1 -> sendEventToKafka(xmsg)));
-                                }else{
-                                    xMsgRepo.insert(dao).subscribe(xMessage -> sendEventToKafka(xmsg));
-                                }
-                            }
-                        });
-                    }else{
-                        xMsgRepo.insert(dao).subscribe(xMessageDAO -> {
-                           sendEventToKafka(xmsg);
-                        });
+            adapter.convertMessageToXMsg(inboundMessage)
+                    .doOnError(genericError("Error in converting to XMessage by Adapter"))
+                    .subscribe(xmsg -> {
+                        XMessageDAO currentMessageToBeInserted = XMessageDAOUtills.convertXMessageToDAO(xmsg);
+                        if (isCurrentMessageReply(xmsg)) {
+                            String whatsappId = xmsg.getMessageId().getChannelMessageId();
+                            getLatestXMessage(xmsg.getFrom().getUserID(), XMessage.MessageState.REPLIED)
+                                    .doOnError(genericError("Error in getting last message"))
+                                    .subscribe(new Consumer<XMessageDAO>() {
+                                        @Override
+                                        public void accept(XMessageDAO previousMessage) {
+                                            previousMessage.setMessageId(whatsappId);
+                                            xMsgRepo.save(previousMessage)
+                                                    .doOnError(genericError("Error in saving previous message"))
+                                                    .subscribe(new Consumer<XMessageDAO>() {
+                                                        @Override
+                                                        public void accept(XMessageDAO updatedPreviousMessage) {
+                                                            xMsgRepo.insert(currentMessageToBeInserted)
+                                                                    .doOnError(genericError("Error in inserting current message"))
+                                                                    .subscribe(insertedMessage -> {
+                                                                        sendEventToKafka(xmsg);
+                                                                    });
+                                                        }
+                                                    });
+                                        }
+                                    });
+                        } else {
+                            xMsgRepo.insert(currentMessageToBeInserted)
+                                    .doOnError(genericError("Error in inserting current message"))
+                                    .subscribe(xMessageDAO -> {
+                                        sendEventToKafka(xmsg);
+                                    });
 
-                    }
-            });
+                        }
+                    });
 
-        }catch (Exception e){
+        } catch (JAXBException e) {
             e.printStackTrace();
         }
+    }
+
+    private Consumer<Throwable> genericError(String s) {
+        return c -> {
+            log.error(s + "::" + c.getMessage());
+        };
+    }
+
+    private boolean isCurrentMessageReply(XMessage xmsg) {
+        return !xmsg.getMessageState().equals(XMessage.MessageState.REPLIED);
     }
 
     private void sendEventToKafka(XMessage xmsg) {
@@ -77,32 +98,33 @@ public class XMsgProcessingUtil {
                 jsonProcessingException.printStackTrace();
             }
         }
-        log.info("xml {}", xmessage);
         try {
             kafkaProducer.send(topicSuccess, xmessage);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
     }
 
-
-    private Mono<XMessageDAO> getLatestXMessage(String userID) {
+    private Mono<XMessageDAO> getLatestXMessage(String userID, XMessage.MessageState messageState) {
         LocalDateTime yesterday = LocalDateTime.now().minusDays(1L);
-        return xMsgRepo.findAllByFromIdAndTimestampAfter(userID, yesterday).collectList().map(xMessageDAOS -> {
-            if (xMessageDAOS.size() > 0) {
-                List<XMessageDAO> filteredList = new ArrayList<>();
-                for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                    if (xMessageDAO.getMessageState().equals(XMessage.MessageState.REPLIED.name()))
-                        filteredList.add(xMessageDAO);
-                }
-                if (filteredList.size() > 0) {
-                    filteredList.sort(Comparator.comparing(XMessageDAO::getTimestamp));
-                }
+        return xMsgRepo
+                .findAllByFromIdAndTimestampAfter(userID, yesterday)
+                .doOnError(genericError(String.format("Unable to find previous Message for userID %s", userID)))
+                .collectList()
+                .map(xMessageDAOS -> {
+                    if (xMessageDAOS.size() > 0) {
+                        List<XMessageDAO> filteredList = new ArrayList<>();
+                        for (XMessageDAO xMessageDAO : xMessageDAOS) {
+                            if (xMessageDAO.getMessageState().equals(messageState.name()))
+                                filteredList.add(xMessageDAO);
+                        }
+                        if (filteredList.size() > 0) {
+                            filteredList.sort(Comparator.comparing(XMessageDAO::getTimestamp));
+                        }
 
-                return xMessageDAOS.get(0);
-            }
-            return new XMessageDAO();
-        });
+                        return xMessageDAOS.get(0);
+                    }
+                    return new XMessageDAO();
+                });
     }
 }
