@@ -7,7 +7,7 @@ import com.uci.adapter.gs.whatsapp.GupShupWhatsappAdapter;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
 import com.uci.inbound.utils.XMsgProcessingUtil;
-import com.uci.utils.CommonProducer;
+import com.uci.utils.kafka.SimpleProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -37,7 +37,7 @@ public class GupShupWhatsappConverter {
     private GupShupWhatsappAdapter gupShupWhatsappAdapter;
 
     @Autowired
-    public CommonProducer kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepository;

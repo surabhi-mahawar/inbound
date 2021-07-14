@@ -6,7 +6,7 @@ import com.uci.adapter.sunbird.web.inbound.DikshaWebMessageFormat;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
-import com.uci.utils.CommonProducer;
+import com.uci.utils.kafka.SimpleProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ public class DikshaWebController {
     private SunbirdWebPortalAdapter sunbirdWebPortalAdapter;
 
     @Autowired
-    public CommonProducer kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;
