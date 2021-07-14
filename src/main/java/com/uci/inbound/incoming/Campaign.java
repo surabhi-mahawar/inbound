@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.uci.adapter.cdac.CdacBulkSmsAdapter;
 import com.uci.adapter.cdac.TrackDetails;
 import com.uci.adapter.provider.factory.ProviderFactory;
-import com.uci.utils.CommonProducer;
+import com.uci.utils.kafka.SimpleProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,7 @@ public class Campaign {
     private String campaign;
 
     @Autowired
-    public CommonProducer kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     private ProviderFactory factoryProvider;

@@ -2,7 +2,7 @@ package com.uci.inbound.incoming;
 
 
 import com.uci.adapter.provider.factory.ProviderFactory;
-import com.uci.utils.CommonProducer;
+import com.uci.utils.kafka.SimpleProducer;
 import io.fusionauth.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ public class InternalBot {
     private String campaign;
 
     @Autowired
-    public CommonProducer kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Qualifier("rest")
     @Autowired

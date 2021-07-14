@@ -7,7 +7,7 @@ import com.uci.adapter.Request.CommonMessage;
 import com.uci.dao.models.XMessageDAO;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.dao.utils.XMessageDAOUtills;
-import com.uci.utils.CommonProducer;
+import com.uci.utils.kafka.SimpleProducer;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import messagerosa.core.model.XMessage;
@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Slf4j
 @Builder
@@ -27,7 +26,7 @@ public class XMsgProcessingUtil {
 
     AbstractProvider adapter;
     CommonMessage inboundMessage;
-    CommonProducer kafkaProducer;
+    SimpleProducer kafkaProducer;
     XMessageRepository xMsgRepo;
     String topicSuccess;
     String topicFailure;
@@ -92,17 +91,9 @@ public class XMsgProcessingUtil {
         try {
             xmessage = xmsg.toXML();
         } catch (JAXBException e) {
-            try {
-                kafkaProducer.send(topicFailure, inboundMessage.toString());
-            } catch (JsonProcessingException jsonProcessingException) {
-                jsonProcessingException.printStackTrace();
-            }
+            kafkaProducer.send(topicFailure, inboundMessage.toString());
         }
-        try {
-            kafkaProducer.send(topicSuccess, xmessage);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        kafkaProducer.send(topicSuccess, xmessage);
     }
 
     private Mono<XMessageDAO> getLatestXMessage(String userID, XMessage.MessageState messageState) {
