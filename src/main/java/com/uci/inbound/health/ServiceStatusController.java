@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.uci.utils.BotService;
+import com.uci.utils.kafka.KafkaConfig;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/service")
 public class ServiceStatusController {
+	
+	@Value("${spring.kafka.bootstrap-servers}")
+	String kafkaServerUrl;
 	
 	@Value("${campaign.url}")
 	String campaignUrl;
@@ -60,7 +64,7 @@ public class ServiceStatusController {
     
     @RequestMapping(value = "/health/kafka", method = RequestMethod.GET, produces = { "application/json", "text/json" })
     public ResponseEntity<JsonNode> kafkaStatusCheck() throws JsonProcessingException {
-    	HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator();
+    	HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator(kafkaServerUrl);
         Map<String, Object> kafkaDetails = kafkaIndicator.health().getDetails();
         String kafkaHealth = kafkaIndicator.getHealth(false).getStatus().toString();
     	
@@ -73,7 +77,9 @@ public class ServiceStatusController {
         	kafkaDetailNode.put(entry.getKey(), entry.getValue().toString());
         };
         ((ObjectNode) resultNode).put("healthy", kafkaHealth.equals("UP"));
-        ((ObjectNode) resultNode).put("details", kafkaDetailNode);
+        if(kafkaHealth.equals("UP")) {
+        	((ObjectNode) resultNode).put("details", kafkaDetailNode);
+        }
         
         return ResponseEntity.ok(json);
     }

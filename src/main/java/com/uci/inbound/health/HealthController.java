@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.uci.utils.BotService;
+import com.uci.utils.kafka.KafkaConfig;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class HealthController {
+	
+	@Value("${spring.kafka.bootstrap-servers}")
+	String kafkaServerUrl;
 	
 	@Value("${campaign.url}")
 	String campaignUrl;
@@ -53,7 +57,7 @@ public class HealthController {
         cassandraNode.put("healthy", cassandraHealth.equals("UP"));
         
         /* Kafka health info */
-        HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator();
+        HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator(kafkaServerUrl);
         Map<String, Object> kafkaDetails = kafkaIndicator.health().getDetails();
         String kafkaHealth = kafkaIndicator.getHealth(false).getStatus().toString();
         
@@ -66,11 +70,12 @@ public class HealthController {
 
         kafkaNode.put("name", "kafka");
         kafkaNode.put("healthy", kafkaHealth.equals("UP"));
-        kafkaNode.put("details", kafkaDetailNode);
+        if(kafkaHealth.equals("UP")) {
+        	kafkaNode.put("details", kafkaDetailNode);
+        }
         
         /* Campaign url health info */
-        String url = "http://143.110.255.220:9999/";
-        Boolean campaignStatus = botService.statusUrlCheck(url);
+        Boolean campaignStatus = botService.statusUrlCheck(campaignUrl);
         ObjectNode campaignNode = mapper.createObjectNode();
         campaignNode.put("name", "campaign");
         campaignNode.put("healthy", campaignStatus);
@@ -82,6 +87,13 @@ public class HealthController {
         arrayNode.addAll(Arrays.asList(cassandraNode, kafkaNode, campaignNode));
         
         ((ObjectNode) resultNode).putArray("checks").addAll(arrayNode);
+        
+        /* System overall health */
+        if(cassandraHealth.equals("UP") && kafkaHealth.equals("UP") && campaignStatus) {
+        	((ObjectNode) resultNode).put("healthy", true);
+        } else {
+        	((ObjectNode) resultNode).put("healthy", false);
+        }
         
         return ResponseEntity.ok(json);
     }
