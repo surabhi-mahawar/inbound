@@ -28,9 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HealthController {
 	
-	@Value("${spring.kafka.bootstrap-servers}")
-	String kafkaServerUrl;
-	
 	@Value("${campaign.url}")
 	String campaignUrl;
 	
@@ -57,7 +54,7 @@ public class HealthController {
         cassandraNode.put("healthy", cassandraHealth.equals("UP"));
         
         /* Kafka health info */
-        HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator(kafkaServerUrl);
+        HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator();
         Map<String, Object> kafkaDetails = kafkaIndicator.health().getDetails();
         String kafkaHealth = kafkaIndicator.getHealth(false).getStatus().toString();
         

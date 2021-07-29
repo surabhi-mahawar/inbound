@@ -27,9 +27,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/service")
 public class ServiceStatusController {
 	
-	@Value("${spring.kafka.bootstrap-servers}")
-	String kafkaServerUrl;
-	
 	@Value("${campaign.url}")
 	String campaignUrl;
 	
@@ -64,7 +61,7 @@ public class ServiceStatusController {
     
     @RequestMapping(value = "/health/kafka", method = RequestMethod.GET, produces = { "application/json", "text/json" })
     public ResponseEntity<JsonNode> kafkaStatusCheck() throws JsonProcessingException {
-    	HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator(kafkaServerUrl);
+    	HealthIndicator kafkaIndicator = kafkaConfig.kafkaHealthIndicator();
         Map<String, Object> kafkaDetails = kafkaIndicator.health().getDetails();
         String kafkaHealth = kafkaIndicator.getHealth(false).getStatus().toString();
     	
