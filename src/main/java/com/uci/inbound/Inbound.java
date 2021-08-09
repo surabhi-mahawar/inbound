@@ -24,8 +24,5 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class Inbound {
     public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(Inbound.class, args);
-        
-        KakfaLogTopics object = new KakfaLogTopics();
-        object.createTopic();
     }
 }
