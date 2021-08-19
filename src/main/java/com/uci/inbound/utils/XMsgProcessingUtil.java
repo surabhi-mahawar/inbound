@@ -130,32 +130,7 @@ public class XMsgProcessingUtil {
 
     private Mono<String> getAppName(String text, SenderReceiverInfo from) {
         LocalDateTime yesterday = LocalDateTime.now().minusDays(1L);
-        try {
-            return botService.getCampaignFromStartingMessage(text)
-                    .flatMap(new Function<String, Mono<? extends String>>() {
-                        @Override
-                        public Mono<String> apply(String appName1) {
-                            if (appName1 == null || appName1.equals("")) {
-                                try {
-                                    return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
-                                        @Override
-                                        public String apply(XMessageDAO xMessageLast) {
-                                            return (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp();
-                                        }
-                                    });
-                                } catch (Exception e2) {
-                                    return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
-                                        @Override
-                                        public String apply(XMessageDAO xMessageLast) {
-                                            return (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp();
-                                        }
-                                    });
-                                }
-                            }
-                            return (appName1 == null || appName1.isEmpty()) ? Mono.just("finalAppName") : Mono.just(appName1);
-                        }
-                    });
-        } catch (Exception e) {
+        if (text.equals("")) {
             try {
                 return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
                     @Override
@@ -170,6 +145,49 @@ public class XMsgProcessingUtil {
                         return xMessageLast.getApp();
                     }
                 });
+            }
+        } else {
+            try {
+                return botService.getCampaignFromStartingMessage(text)
+                        .flatMap(new Function<String, Mono<? extends String>>() {
+                            @Override
+                            public Mono<String> apply(String appName1) {
+                                if (appName1 == null || appName1.equals("")) {
+                                    try {
+                                        return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
+                                            @Override
+                                            public String apply(XMessageDAO xMessageLast) {
+                                                return (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp();
+                                            }
+                                        });
+                                    } catch (Exception e2) {
+                                        return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
+                                            @Override
+                                            public String apply(XMessageDAO xMessageLast) {
+                                                return (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp();
+                                            }
+                                        });
+                                    }
+                                }
+                                return (appName1 == null || appName1.isEmpty()) ? Mono.just("finalAppName") : Mono.just(appName1);
+                            }
+                        });
+            } catch (Exception e) {
+                try {
+                    return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
+                        @Override
+                        public String apply(XMessageDAO xMessageLast) {
+                            return xMessageLast.getApp();
+                        }
+                    });
+                } catch (Exception e2) {
+                    return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
+                        @Override
+                        public String apply(XMessageDAO xMessageLast) {
+                            return xMessageLast.getApp();
+                        }
+                    });
+                }
             }
         }
     }
