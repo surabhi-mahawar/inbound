@@ -12,6 +12,8 @@ import org.springframework.kafka.annotation.EnableKafka;
 
 import com.uci.dao.service.HealthService;
 
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
 @EnableKafka
 @EnableReactiveCassandraRepositories("com.uci.dao")
 @EntityScan("com.uci.dao")
@@ -23,6 +25,7 @@ import com.uci.dao.service.HealthService;
 })
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.uci.inbound", "com.uci.adapter", "com.uci.utils"})
+@EnableSwagger2
 public class Inbound {
     public static void main(String[] args) {
         SpringApplication.run(Inbound.class, args);
