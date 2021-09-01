@@ -59,13 +59,6 @@ public class ServiceStatusController {
         return ResponseEntity.ok(jsonNode);
     }
     
-    @RequestMapping(value = "/health/test", method = RequestMethod.POST, produces = { "application/json", "text/json" })
-    public ResponseEntity<JsonNode> testStatusCheck() throws JsonProcessingException, IOException {
-    	JsonNode jsonNode = getResponseJsonNode();
-        
-        return ResponseEntity.ok(jsonNode);
-    }
-    
     /**
      * Returns json node for service response
      * 
