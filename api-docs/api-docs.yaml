@@ -1,43 +1,54 @@
 openapi: 3.0.1
 info:
-  title: OpenAPI definition
-  version: v0
+  title: UCI Inbound
+  description: UCI Inbound Api Documentation
+  termsOfService: http://swagger.io/terms/
+  license:
+    name: Apache 2.0
+    url: http://springdoc.org
+  version: "1.0"
 servers:
 - url: http://localhost:8085
   description: Generated server url
 paths:
-  /whatsapp/opt-in:
-    post:
-      tags:
-      - gup-shup-opt-in
-      operationId: gupShupWhatsApp
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GSWhatsAppMessage'
-        required: true
-      responses:
-        "200":
-          description: OK
   /netcore/whatsApp:
     post:
       tags:
-      - netcore-whatsapp-converter
+      - Netcore Apis
+      summary: Send message to kafka topic via netcore whatsapp service
+      description: This API is used to get send message to inbound kafka topic received
+        from netcore whatsapp service.
       operationId: netcoreWhatsApp
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/NetcoreMessageFormat'
+            examples:
+              Text Message:
+                description: Request body for text messages
+                value:
+                  messages:
+                  - message_id: ABEGkZlgQyWAAgo-sDVSUOa9jH0z
+                    from: "919960432580"
+                    received_at: "1567090835"
+                    context:
+                      ncmessage_id: null
+                      message_id: null
+                    message_type: TEXT
+                    text_type:
+                      text: Hi UCI
         required: true
       responses:
         "200":
-          description: OK
+          description: OK!
   /gupshup/whatsApp:
     post:
       tags:
-      - gup-shup-whatsapp-converter
+      - Gupshup Apis
+      summary: Send message to kafka topic via gupshup whatsapp service
+      description: This API is used to get send message to inbound kafka topic received
+        from gupshup whatsapp service.
       operationId: gupshupWhatsApp
       requestBody:
         content:
@@ -46,201 +57,73 @@ paths:
               $ref: '#/components/schemas/GSWhatsAppMessage'
       responses:
         "200":
-          description: OK
-  /diksha/web:
-    post:
-      tags:
-      - diksha-web-controller
-      operationId: dikshaWeb
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DikshaWebMessageFormat'
-        required: true
-      responses:
-        "200":
-          description: OK
-  /cdac/sms/single/:
-    post:
-      tags:
-      - cdac-converter
-      operationId: cdacSingle
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CommonMessage'
-      responses:
-        "200":
-          description: OK
-  /cdac/sms/bulk/:
-    post:
-      tags:
-      - cdac-converter
-      operationId: cdacBulk
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/CommonMessage'
-      responses:
-        "200":
-          description: OK
+          description: OK!
   /service/health/kafka:
     get:
       tags:
-      - service-status-controller
+      - Services Health Api
+      summary: Get Kafka Health
+      description: This API is used to get kafka health status
       operationId: kafkaStatusCheck
       responses:
         "200":
-          description: OK
+          description: OK!
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonNode'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/JsonNode'
+                $ref: '#/components/schemas/ComponentHealthApiExample'
   /service/health/cassandra:
     get:
       tags:
-      - service-status-controller
+      - Services Health Api
+      summary: Get Cassandra Health
+      description: This API is used to get cassandra health status
       operationId: cassandraStatusCheck
       responses:
         "200":
-          description: OK
+          description: OK!
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonNode'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/JsonNode'
+                $ref: '#/components/schemas/ComponentHealthApiExample'
   /service/health/campaign:
     get:
       tags:
-      - service-status-controller
+      - Services Health Api
+      summary: Get Campaign Health
+      description: This API is used to get campaign health status
       operationId: campaignUrlStatusCheck
       responses:
         "200":
-          description: OK
+          description: OK!
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonNode'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/JsonNode'
-  /internalBot/reject-leave:
-    get:
-      tags:
-      - internal-bot
-      operationId: rejectLeave
-      parameters:
-      - name: userEmail
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: workingDays
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/User'
-  /internalBot/delete-leave:
-    get:
-      tags:
-      - internal-bot
-      operationId: deleteLeave
-      parameters:
-      - name: userEmail
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: workingDays
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/User'
-  /internalBot/approve-leave:
-    get:
-      tags:
-      - internal-bot
-      operationId: approveLeave
-      parameters:
-      - name: userEmail
-        in: query
-        required: false
-        schema:
-          type: string
-      - name: workingDays
-        in: query
-        required: false
-        schema:
-          type: integer
-          format: int32
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/ComponentHealthApiExample'
   /health:
     get:
       tags:
-      - health-controller
+      - System Health Apis
+      summary: Get System Health
+      description: |-
+        This API is used to get system health. It included health of two components.
+        - Kafka
+        - Cassandra
       operationId: statusCheck
       responses:
         "200":
-          description: OK
+          description: OK!
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JsonNode'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/JsonNode'
-  /campaign/status/cdac/bulk:
-    get:
-      tags:
-      - campaign
-      operationId: getCampaignStatus
-      parameters:
-      - name: campaignId
-        in: query
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/TrackDetails'
+                $ref: '#/components/schemas/SystemHealthApiExample'
   /campaign/start:
     get:
       tags:
-      - campaign
+      - Campaign Apis
+      summary: Start Campaign
+      description: This API is used to start the campaign kafka topic.- The fields
+        marked with an asterisk (*) are mandatory. They cannot be null or empty.
       operationId: startCampaign
       parameters:
       - name: campaignId
@@ -254,7 +137,9 @@ paths:
   /campaign/resume:
     get:
       tags:
-      - campaign
+      - Campaign Apis
+      summary: Resume Campaign
+      description: This API is used to start campaign kafka topic.
       operationId: resumeCampaign
       parameters:
       - name: campaignId
@@ -268,7 +153,9 @@ paths:
   /campaign/pause:
     get:
       tags:
-      - campaign
+      - Campaign Apis
+      summary: Pause Campaign
+      description: This API is used to pause the campaign kafka topic.
       operationId: pauseCampaign
       parameters:
       - name: campaignId
@@ -281,58 +168,6 @@ paths:
           description: OK
 components:
   schemas:
-    GSWhatsAppMessage:
-      type: object
-      properties:
-        waNumber:
-          type: string
-        mobile:
-          type: string
-        replyId:
-          type: string
-        messageId:
-          type: string
-        timestamp:
-          type: integer
-          format: int64
-        name:
-          type: string
-        version:
-          type: integer
-          format: int32
-        type:
-          type: string
-        text:
-          type: string
-        image:
-          $ref: '#/components/schemas/WAInboundFile'
-        document:
-          $ref: '#/components/schemas/WAInboundFile'
-        voice:
-          $ref: '#/components/schemas/WAInboundFile'
-        audio:
-          $ref: '#/components/schemas/WAInboundFile'
-        video:
-          $ref: '#/components/schemas/WAInboundFile'
-        location:
-          type: string
-        response:
-          type: string
-        extra:
-          type: string
-        app:
-          type: string
-    WAInboundFile:
-      type: object
-      properties:
-        mime_type:
-          type: string
-        signature:
-          type: string
-        url:
-          type: string
-        caption:
-          type: string
     MessageContext:
       type: object
       properties:
@@ -411,657 +246,136 @@ components:
       properties:
         text:
           type: string
-    DikshaWebMessageFormat:
+    GSWhatsAppMessage:
       type: object
       properties:
-        messages:
-          type: array
-          items:
-            $ref: '#/components/schemas/SunbirdWebMessage'
-    SunbirdWebMessage:
-      type: object
-      properties:
+        waNumber:
+          type: string
+        mobile:
+          type: string
+        replyId:
+          type: string
         messageId:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        name:
+          type: string
+        version:
+          type: integer
+          format: int32
+        type:
           type: string
         text:
           type: string
-        userId:
+        image:
+          $ref: '#/components/schemas/WAInboundFile'
+        document:
+          $ref: '#/components/schemas/WAInboundFile'
+        voice:
+          $ref: '#/components/schemas/WAInboundFile'
+        audio:
+          $ref: '#/components/schemas/WAInboundFile'
+        video:
+          $ref: '#/components/schemas/WAInboundFile'
+        location:
           type: string
-        appId:
+        response:
           type: string
-        channel:
+        extra:
           type: string
-        from:
+        app:
           type: string
-        context:
-          type: object
-          additionalProperties:
-            type: object
-    CommonMessage:
-      type: object
-    JsonNode:
-      type: object
-      properties:
-        number:
-          type: boolean
-        bigInteger:
-          type: boolean
-        valueNode:
-          type: boolean
-        containerNode:
-          type: boolean
-        missingNode:
-          type: boolean
-        object:
-          type: boolean
-        pojo:
-          type: boolean
-        integralNumber:
-          type: boolean
-        floatingPointNumber:
-          type: boolean
-        short:
-          type: boolean
-        int:
-          type: boolean
-        long:
-          type: boolean
-        double:
-          type: boolean
-        bigDecimal:
-          type: boolean
-        textual:
-          type: boolean
-        boolean:
-          type: boolean
-        binary:
-          type: boolean
-        float:
-          type: boolean
-        nodeType:
-          type: string
-          enum:
-          - ARRAY
-          - BINARY
-          - BOOLEAN
-          - MISSING
-          - "NULL"
-          - NUMBER
-          - OBJECT
-          - POJO
-          - STRING
-        array:
-          type: boolean
-        empty:
-          type: boolean
-        null:
-          type: boolean
-    GroupMember:
+    WAInboundFile:
       type: object
       properties:
-        data:
-          type: object
-          additionalProperties:
-            type: object
-        groupId:
+        mime_type:
           type: string
-          format: uuid
+        signature:
+          type: string
+        url:
+          type: string
+        caption:
+          type: string
+    ComponentHealthApiExample:
+      type: object
+      properties:
         id:
           type: string
-          format: uuid
-        insertInstant:
+          example: api.content.health
+        ver:
           type: string
-          format: date-time
-        userId:
+          example: "3.0"
+        ts:
           type: string
-          format: uuid
-    LocalTime:
+          example: 2021-09-01T11:14:50Z
+        params:
+          $ref: '#/components/schemas/HealthApiParamsParameter'
+        responseCode:
+          type: string
+          example: OK
+        result:
+          $ref: '#/components/schemas/ComponentHealthApiResultParameter'
+    ComponentHealthApiResultParameter:
       type: object
       properties:
-        hour:
-          type: integer
-          format: int32
-        minute:
-          type: integer
-          format: int32
-        second:
-          type: integer
-          format: int32
-        nano:
-          type: integer
-          format: int32
-    User:
+        healthy:
+          type: boolean
+          example: true
+    HealthApiParamsParameter:
       type: object
       properties:
-        encryptionScheme:
+        resmsgid:
           type: string
-        factor:
-          type: integer
-          format: int32
-        id:
+          example: 859fee0c-94d6-4a0d-b786-2025d763b78a
+        msgid:
           type: string
-          format: uuid
-        password:
+          example: "null"
+        err:
           type: string
-        passwordChangeRequired:
-          type: boolean
-        passwordLastUpdateInstant:
-          type: string
-          format: date-time
-        salt:
-          type: string
-        verified:
-          type: boolean
-        preferredLanguages:
-          type: array
-          items:
-            type: object
-            properties:
-              script:
-                type: string
-              country:
-                type: string
-              variant:
-                type: string
-              language:
-                type: string
-              unicodeLocaleAttributes:
-                uniqueItems: true
-                type: array
-                items:
-                  type: string
-              unicodeLocaleKeys:
-                uniqueItems: true
-                type: array
-                items:
-                  type: string
-              displayLanguage:
-                type: string
-              displayScript:
-                type: string
-              displayCountry:
-                type: string
-              displayVariant:
-                type: string
-              displayName:
-                type: string
-              extensionKeys:
-                uniqueItems: true
-                type: array
-                items:
-                  type: string
-              iso3Language:
-                type: string
-              iso3Country:
-                type: string
-        memberships:
-          type: array
-          items:
-            $ref: '#/components/schemas/GroupMember'
-        registrations:
-          type: array
-          items:
-            $ref: '#/components/schemas/UserRegistration'
-        active:
-          type: boolean
-        birthDate:
-          type: string
-          format: date
-        cleanSpeakId:
-          type: string
-          format: uuid
-        data:
-          type: object
-          additionalProperties:
-            type: object
-        email:
-          type: string
-        expiry:
-          type: string
-          format: date-time
-        firstName:
-          type: string
-        fullName:
-          type: string
-        imageUrl:
-          type: string
-          format: uri
-        insertInstant:
-          type: string
-          format: date-time
-        lastLoginInstant:
-          type: string
-          format: date-time
-        lastName:
-          type: string
-        middleName:
-          type: string
-        mobilePhone:
-          type: string
-        parentEmail:
-          type: string
-        tenantId:
-          type: string
-          format: uuid
-        timezone:
-          type: object
-          properties:
-            id:
-              type: string
-            rules:
-              type: object
-              properties:
-                transitions:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      offsetBefore:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      offsetAfter:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      dateTimeBefore:
-                        type: string
-                        format: date-time
-                      duration:
-                        type: object
-                        properties:
-                          seconds:
-                            type: integer
-                            format: int64
-                          units:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                dateBased:
-                                  type: boolean
-                                timeBased:
-                                  type: boolean
-                                durationEstimated:
-                                  type: boolean
-                          negative:
-                            type: boolean
-                          zero:
-                            type: boolean
-                          nano:
-                            type: integer
-                            format: int32
-                      instant:
-                        type: string
-                        format: date-time
-                      gap:
-                        type: boolean
-                      overlap:
-                        type: boolean
-                      dateTimeAfter:
-                        type: string
-                        format: date-time
-                transitionRules:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      month:
-                        type: string
-                        enum:
-                        - JANUARY
-                        - FEBRUARY
-                        - MARCH
-                        - APRIL
-                        - MAY
-                        - JUNE
-                        - JULY
-                        - AUGUST
-                        - SEPTEMBER
-                        - OCTOBER
-                        - NOVEMBER
-                        - DECEMBER
-                      timeDefinition:
-                        type: string
-                        enum:
-                        - UTC
-                        - WALL
-                        - STANDARD
-                      standardOffset:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      offsetBefore:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      offsetAfter:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      dayOfMonthIndicator:
-                        type: integer
-                        format: int32
-                      localTime:
-                        $ref: '#/components/schemas/LocalTime'
-                      midnightEndOfDay:
-                        type: boolean
-                      dayOfWeek:
-                        type: string
-                        enum:
-                        - MONDAY
-                        - TUESDAY
-                        - WEDNESDAY
-                        - THURSDAY
-                        - FRIDAY
-                        - SATURDAY
-                        - SUNDAY
-                fixedOffset:
-                  type: boolean
-        twoFactorDelivery:
-          type: string
-          enum:
-          - None
-          - TextMessage
-        twoFactorEnabled:
-          type: boolean
-        twoFactorSecret:
-          type: string
-        username:
-          type: string
-        usernameStatus:
-          type: string
-          enum:
-          - ACTIVE
-          - PENDING
-          - REJECTED
-    UserRegistration:
-      type: object
-      properties:
-        data:
-          type: object
-          additionalProperties:
-            type: object
-        preferredLanguages:
-          type: array
-          items:
-            type: object
-            properties:
-              script:
-                type: string
-              country:
-                type: string
-              variant:
-                type: string
-              language:
-                type: string
-              unicodeLocaleAttributes:
-                uniqueItems: true
-                type: array
-                items:
-                  type: string
-              unicodeLocaleKeys:
-                uniqueItems: true
-                type: array
-                items:
-                  type: string
-              displayLanguage:
-                type: string
-              displayScript:
-                type: string
-              displayCountry:
-                type: string
-              displayVariant:
-                type: string
-              displayName:
-                type: string
-              extensionKeys:
-                uniqueItems: true
-                type: array
-                items:
-                  type: string
-              iso3Language:
-                type: string
-              iso3Country:
-                type: string
-        tokens:
-          type: object
-          additionalProperties:
-            type: string
-        applicationId:
-          type: string
-          format: uuid
-        authenticationToken:
-          type: string
-        cleanSpeakId:
-          type: string
-          format: uuid
-        id:
-          type: string
-          format: uuid
-        insertInstant:
-          type: string
-          format: date-time
-        lastLoginInstant:
-          type: string
-          format: date-time
-        roles:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        timezone:
-          type: object
-          properties:
-            id:
-              type: string
-            rules:
-              type: object
-              properties:
-                transitions:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      offsetBefore:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      offsetAfter:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      dateTimeBefore:
-                        type: string
-                        format: date-time
-                      duration:
-                        type: object
-                        properties:
-                          seconds:
-                            type: integer
-                            format: int64
-                          units:
-                            type: array
-                            items:
-                              type: object
-                              properties:
-                                dateBased:
-                                  type: boolean
-                                timeBased:
-                                  type: boolean
-                                durationEstimated:
-                                  type: boolean
-                          negative:
-                            type: boolean
-                          zero:
-                            type: boolean
-                          nano:
-                            type: integer
-                            format: int32
-                      instant:
-                        type: string
-                        format: date-time
-                      gap:
-                        type: boolean
-                      overlap:
-                        type: boolean
-                      dateTimeAfter:
-                        type: string
-                        format: date-time
-                transitionRules:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      month:
-                        type: string
-                        enum:
-                        - JANUARY
-                        - FEBRUARY
-                        - MARCH
-                        - APRIL
-                        - MAY
-                        - JUNE
-                        - JULY
-                        - AUGUST
-                        - SEPTEMBER
-                        - OCTOBER
-                        - NOVEMBER
-                        - DECEMBER
-                      timeDefinition:
-                        type: string
-                        enum:
-                        - UTC
-                        - WALL
-                        - STANDARD
-                      standardOffset:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      offsetBefore:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      offsetAfter:
-                        type: object
-                        properties:
-                          totalSeconds:
-                            type: integer
-                            format: int32
-                          id:
-                            type: string
-                      dayOfMonthIndicator:
-                        type: integer
-                        format: int32
-                      localTime:
-                        $ref: '#/components/schemas/LocalTime'
-                      midnightEndOfDay:
-                        type: boolean
-                      dayOfWeek:
-                        type: string
-                        enum:
-                        - MONDAY
-                        - TUESDAY
-                        - WEDNESDAY
-                        - THURSDAY
-                        - FRIDAY
-                        - SATURDAY
-                        - SUNDAY
-                fixedOffset:
-                  type: boolean
-        username:
-          type: string
-        usernameStatus:
-          type: string
-          enum:
-          - ACTIVE
-          - PENDING
-          - REJECTED
-        verified:
-          type: boolean
-    DeliveryDetails:
-      type: object
-      properties:
-        phoneNumberStatus:
-          type: array
-          xml:
-            name: "no"
-          items:
-            $ref: '#/components/schemas/PhoneNumberStatus'
-    PhoneNumberStatus:
-      type: object
-      properties:
-        mobileNumber:
-          type: string
-          xml:
-            name: mobNo
-            attribute: true
+          example: "null"
         status:
           type: string
-    TrackDetails:
+          example: Successful
+        errmsg:
+          type: string
+          example: "null"
+    HealthApiChecksParameter:
       type: object
       properties:
-        messageId:
+        name:
           type: string
-          xml:
-            name: msgid
-        deliveredSMSCount:
+          example: Cassandra
+        healthy:
+          type: boolean
+          example: true
+    HealthApiResultParameter:
+      type: object
+      properties:
+        checks:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthApiChecksParameter'
+        healthy:
+          type: boolean
+          example: true
+    SystemHealthApiExample:
+      type: object
+      properties:
+        id:
           type: string
-          xml:
-            name: delvSMSCount
-        failedSMSCount:
+          example: api.content.health
+        ver:
           type: string
-          xml:
-            name: fldSMSCount
-        submittedSMSCount:
+          example: "3.0"
+        ts:
           type: string
-          xml:
-            name: subSMSCount
-        undelivered:
+          example: 2021-09-01T11:14:50Z
+        params:
+          $ref: '#/components/schemas/HealthApiParamsParameter'
+        responseCode:
           type: string
-          xml:
-            name: undelv
-        delivered:
-          $ref: '#/components/schemas/DeliveryDetails'
-        submitted:
-          $ref: '#/components/schemas/DeliveryDetails'
-        failed:
-          $ref: '#/components/schemas/DeliveryDetails'
-      xml:
-        name: dept
+          example: OK
+        result:
+          $ref: '#/components/schemas/HealthApiResultParameter'
