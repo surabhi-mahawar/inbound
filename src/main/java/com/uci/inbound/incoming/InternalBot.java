@@ -4,6 +4,7 @@ package com.uci.inbound.incoming;
 import com.uci.adapter.provider.factory.ProviderFactory;
 import com.uci.utils.kafka.SimpleProducer;
 import io.fusionauth.domain.User;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +31,7 @@ public class InternalBot {
     @Autowired
     private ProviderFactory factoryProvider;
 
+    @Operation(hidden = true)
     @RequestMapping(value = "/delete-leave", method = RequestMethod.GET)
     public ResponseEntity<User> deleteLeave(
             @RequestParam(value = "userEmail", required = false) String userEmail,
@@ -40,6 +42,7 @@ public class InternalBot {
         return restTemplate.getForEntity(url, User.class);
     }
 
+    @Operation(hidden = true)
     @RequestMapping(value = "/approve-leave", method = RequestMethod.GET)
     public ResponseEntity<User> approveLeave(
             @RequestParam(value = "userEmail", required = false) String userEmail,
@@ -50,6 +53,7 @@ public class InternalBot {
         return restTemplate.getForEntity(url, User.class);
     }
 
+    @Operation(hidden = true)
     @RequestMapping(value = "/reject-leave", method = RequestMethod.GET)
     public ResponseEntity<User> rejectLeave(
             @RequestParam(value = "userEmail", required = false) String userEmail,

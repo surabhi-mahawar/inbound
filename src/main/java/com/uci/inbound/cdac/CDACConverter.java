@@ -6,6 +6,8 @@ import com.uci.adapter.Request.CommonMessage;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.kafka.SimpleProducer;
+
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,7 +44,8 @@ public class CDACConverter {
 
     @Autowired
     public XMessageRepository xmsgRepo;
-
+    
+    @Operation(hidden = true)
     @RequestMapping(value = "/sms/bulk/", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void cdacBulk(@Valid CommonMessage message) throws JsonProcessingException {
 
@@ -56,6 +59,7 @@ public class CDACConverter {
                 .build().process();
     }
 
+    @Operation(hidden = true)
     @RequestMapping(value = "/sms/single/", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void cdacSingle(@Valid CommonMessage message) throws JsonProcessingException {
 
