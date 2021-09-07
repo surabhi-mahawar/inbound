@@ -7,7 +7,7 @@
 	</Properties>
 	<Appenders>
 		<customKafka name="KafkaLogAppender" topic="${kafka.topic}" syncSend="false">
-			<CustomLogLayout />
+			<PatternLayout pattern="%message" />
 			<Property name="bootstrap.servers">${kafka.bootstrap.servers}</Property>
 		</customKafka>
 
