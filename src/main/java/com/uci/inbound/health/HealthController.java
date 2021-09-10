@@ -35,8 +35,8 @@ public class HealthController {
         
         JsonNode jsonNode = mapper.readTree("{\"id\":\"api.content.health\",\"ver\":\"3.0\",\"ts\":\"2021-06-26T22:47:05Z+05:30\",\"params\":{\"resmsgid\":\"859fee0c-94d6-4a0d-b786-2025d763b78a\",\"msgid\":null,\"err\":null,\"status\":\"successful\",\"errmsg\":null},\"responseCode\":\"OK\",\"result\":{\"checks\":[{\"name\":\"redis cache\",\"healthy\":true},{\"name\":\"graph db\",\"healthy\":true},{\"name\":\"cassandra db\",\"healthy\":true}],\"healthy\":true}}");
         
-        ((ObjectNode) jsonNode).put("ts", dateString);
-        ((ObjectNode) jsonNode).put("result", healthService.getAllHealthNode());
+//        ((ObjectNode) jsonNode).put("ts", dateString);
+//        ((ObjectNode) jsonNode).put("result", healthService.getAllHealthNode());
         
         return ResponseEntity.ok(jsonNode);
     }
