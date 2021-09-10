@@ -27,6 +27,7 @@ public class HealthController {
 	
     @RequestMapping(value = "/health", method = RequestMethod.GET, produces = { "application/json", "text/json" })
     public ResponseEntity<JsonNode> statusCheck() throws JsonProcessingException, IOException {
+        log.error("Health API called");
         ObjectMapper mapper = new ObjectMapper();
         /* Current Date Time */
         LocalDateTime localNow = LocalDateTime.now();

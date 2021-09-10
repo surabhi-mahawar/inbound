@@ -34,6 +34,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class ServiceStatusController {
 	@Autowired 
 	private HealthService healthService;
+
+    @RequestMapping(value = "/health", method = RequestMethod.GET, produces = { "application/json", "text/json" })
+    public ResponseEntity<JsonNode> statusCheck() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode json = mapper.readTree("{\"id\":\"api.content.service.health\",\"ver\":\"3.0\",\"ts\":null,\"params\":{\"resmsgid\":null,\"msgid\":null,\"err\":null,\"status\":\"successful\",\"errmsg\":null},\"responseCode\":\"OK\",\"result\":{\"healthy\":true}}");
+        return ResponseEntity.ok(json);
+    }
     
     @RequestMapping(value = "/health/cassandra", method = RequestMethod.GET, produces = { "application/json", "text/json" })
     public ResponseEntity<JsonNode> cassandraStatusCheck() throws IOException, JsonProcessingException {
