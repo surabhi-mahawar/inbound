@@ -1,6 +1,7 @@
 package com.uci.inbound.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uci.adapter.provider.factory.AbstractProvider;
 import com.uci.adapter.Request.CommonMessage;
@@ -87,9 +88,20 @@ public class XMsgProcessingUtil {
 										});
 							} else {
 								/* Log telemtery event - Start Conversation */
-								telemetrylogger.info(new LogTelemetryMessage(String.format("Start Conversation with incoming message : %s", incomingMessage),
-										TelemetryEventNames.STARTCONVERSATION, "", xmsg.getChannel(),
-										xmsg.getProvider(), producerID, xmsg.getFrom().getUserID()));
+								campaignService.getCampaignFromNameTransformer(xmsg.getCampaign())
+								.doOnError(genericError("Error in getting campaign data for telemetry log", null))
+								.subscribe(new Consumer<JsonNode>() {
+									@Override
+									public void accept(JsonNode t) {
+										String id = t.get("id") != null ? t.get("id").asText() : null;
+										String ownerId = t.get("owner") != null ? t.get("owner").asText() : null;
+										System.out.println("hey");
+										telemetrylogger.info(new LogTelemetryMessage(String.format("Start Conversation with incoming message : %s", incomingMessage),
+												TelemetryEventNames.STARTCONVERSATION, "", xmsg.getChannel(),
+												xmsg.getProvider(), producerID, xmsg.getFrom().getUserID(), id, ownerId));
+									}
+								});
+								
 								xMsgRepo.insert(currentMessageToBeInserted)
 										.doOnError(genericError("Error in inserting current message", xmsg))
 										.subscribe(xMessageDAO -> {

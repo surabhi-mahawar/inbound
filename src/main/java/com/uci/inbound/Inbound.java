@@ -10,6 +10,8 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.data.cassandra.repository.config.EnableReactiveCassandraRepositories;
 import org.springframework.kafka.annotation.EnableKafka;
 
+import com.uci.utils.kafka.KafkaLogConfig;
+
 @EnableKafka
 @EnableReactiveCassandraRepositories("com.uci.dao")
 @EntityScan("com.uci.dao")
