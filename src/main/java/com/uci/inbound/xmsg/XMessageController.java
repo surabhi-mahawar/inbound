@@ -48,9 +48,9 @@ public class XMessageController {
 		return xMsgRepo.findAllByUserId(userid);
 	}
 
-	@RequestMapping(value = "/user/dataAterDays/{userid}", method = RequestMethod.GET, produces = { "application/json",
+	@RequestMapping(value = "/user/dataBeforeHours/{userid}", method = RequestMethod.GET, produces = { "application/json",
 			"text/json" })
-	public Flux<XMessageDAO> getUserDataAfterDays(@PathVariable("userid") String userid) {
+	public Flux<XMessageDAO> getUserDataBeforeHours(@PathVariable("userid") String userid) {
 		long beforeMins = (long) (xMessageUserDataBeforehours * 60);
 		LocalDateTime timestamp = LocalDateTime.now().minusMinutes(beforeMins);
 		
@@ -66,9 +66,9 @@ public class XMessageController {
 		});
 	}
 	
-	@RequestMapping(value = "/user/dataAfterDays/{userid}", method = RequestMethod.DELETE, produces = {
+	@RequestMapping(value = "/user/dataBeforeHours/{userid}", method = RequestMethod.DELETE, produces = {
 			"application/json", "text/json" })
-	public void deleteAllByUserId(@PathVariable("userid") String userid) {
+	public void deleteAllByUserIdBeforeHours(@PathVariable("userid") String userid) {
 		long beforeMins = (long) (xMessageUserDataBeforehours * 60);
 		LocalDateTime timestamp = LocalDateTime.now().minusMinutes(beforeMins);
 		
