@@ -60,6 +60,7 @@ public class GupShupWhatsappConverter {
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
+                .botService(botService)
                 .build()
                 .process();
     }
