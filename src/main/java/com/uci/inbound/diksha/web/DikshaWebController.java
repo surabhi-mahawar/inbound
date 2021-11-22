@@ -1,8 +1,9 @@
 package com.uci.inbound.diksha.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uci.adapter.sunbird.web.SunbirdWebPortalAdapter;
-import com.uci.adapter.sunbird.web.inbound.DikshaWebMessageFormat;
+import com.uci.adapter.sunbird.web.inbound.SunbirdWebMessage;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
@@ -26,6 +27,8 @@ public class DikshaWebController {
     @Value("${inboundProcessed}")
     private String inboundProcessed;
 
+    public static ObjectMapper mapper = new ObjectMapper();
+
     @Value("${inbound-error}")
     private String inboundError;
 
@@ -41,9 +44,9 @@ public class DikshaWebController {
     public BotService botService;
 
     @RequestMapping(value = "/web", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public void dikshaWeb(@RequestBody DikshaWebMessageFormat message) throws JsonProcessingException, JAXBException {
+    public void dikshaWeb(@RequestBody SunbirdWebMessage message) throws JsonProcessingException, JAXBException {
 
-        System.out.println(message.toString());
+        System.out.println(mapper.writeValueAsString(message));
 
         sunbirdWebPortalAdapter = SunbirdWebPortalAdapter.builder()
                 .build();
@@ -51,7 +54,7 @@ public class DikshaWebController {
         XMsgProcessingUtil.builder()
                 .adapter(sunbirdWebPortalAdapter)
                 .xMsgRepo(xmsgRepo)
-                .inboundMessage(message.getMessages()[0])
+                .inboundMessage(message)
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
