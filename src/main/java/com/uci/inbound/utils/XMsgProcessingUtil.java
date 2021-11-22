@@ -81,6 +81,7 @@ public class XMsgProcessingUtil {
                     });
 
         } catch (JAXBException e) {
+        	log.info("Error Message: "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -137,17 +138,18 @@ public class XMsgProcessingUtil {
                     public String apply(XMessageDAO xMessageLast) {
                         return xMessageLast.getApp();
                     }
-                });
+                }).doOnError(genericError("Error in getting latest xmessage"));
             } catch (Exception e2) {
                 return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
                     @Override
                     public String apply(XMessageDAO xMessageLast) {
                         return xMessageLast.getApp();
                     }
-                });
+                }).doOnError(genericError("Error in getting latest xmessage - catch"));
             }
         } else {
             try {
+            	log.error("getCampaignFromStartingMessage text: "+text);
                 return botService.getCampaignFromStartingMessage(text)
                         .flatMap(new Function<String, Mono<? extends String>>() {
                             @Override
@@ -159,34 +161,35 @@ public class XMsgProcessingUtil {
                                             public String apply(XMessageDAO xMessageLast) {
                                                 return (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp();
                                             }
-                                        });
+                                        }).doOnError(genericError("Error in getting latest xmessage when app name empty"));
                                     } catch (Exception e2) {
                                         return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
                                             @Override
                                             public String apply(XMessageDAO xMessageLast) {
                                                 return (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp();
                                             }
-                                        });
+                                        }).doOnError(genericError("Error in getting latest xmessage when app name empty - catch"));
                                     }
                                 }
                                 return (appName1 == null || appName1.isEmpty()) ? Mono.just("finalAppName") : Mono.just(appName1);
                             }
                         });
             } catch (Exception e) {
+            	log.error("Exception in getCampaignFromStartingMessage :"+e.getMessage());
                 try {
                     return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
                         @Override
                         public String apply(XMessageDAO xMessageLast) {
                             return xMessageLast.getApp();
                         }
-                    });
+                    }).doOnError(genericError("Error in getting latest xmessage when exception in getCampaignFromStartingMessage"));
                 } catch (Exception e2) {
                     return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, String>() {
                         @Override
                         public String apply(XMessageDAO xMessageLast) {
                             return xMessageLast.getApp();
                         }
-                    });
+                    }).doOnError(genericError("Error in getting latest xmessage when exception in getCampaignFromStartingMessage - catch"));
                 }
             }
         }
