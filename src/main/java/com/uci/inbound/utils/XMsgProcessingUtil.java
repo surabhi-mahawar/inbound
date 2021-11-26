@@ -63,6 +63,7 @@ public class XMsgProcessingUtil {
                                                                         xMsgRepo.insert(currentMessageToBeInserted)
                                                                                 .doOnError(genericError("Error in inserting current message"))
                                                                                 .subscribe(insertedMessage -> {
+                                                                                    log.info("Message Persisted in Cassandra 1");
                                                                                     sendEventToKafka(xmsg);
                                                                                 });
                                                                     }
@@ -71,8 +72,10 @@ public class XMsgProcessingUtil {
                                                 });
                                     } else {
                                         xMsgRepo.insert(currentMessageToBeInserted)
+                                                .log()
                                                 .doOnError(genericError("Error in inserting current message"))
                                                 .subscribe(xMessageDAO -> {
+                                                    log.info("Message Persisted in Cassandra 2");
                                                     sendEventToKafka(xmsg);
                                                 });
                                     }
@@ -204,7 +207,8 @@ public class XMsgProcessingUtil {
                         if (xMessageDAOS.size() > 0) {
                             List<XMessageDAO> filteredList = new ArrayList<>();
                             for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                                if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name()))
+                                if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name())
+                                        || xMessageDAO.getMessageState().equals(XMessage.MessageState.REPLIED.name()))
                                     filteredList.add(xMessageDAO);
                             }
                             if (filteredList.size() > 0) {
