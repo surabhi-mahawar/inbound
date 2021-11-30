@@ -7,8 +7,8 @@ import com.uci.dao.service.HealthService;
 
 @Configuration
 public class AppConfigInbound {
-    @Bean 
-    public HealthService healthService() {
-    	return new HealthService();
-    }
+	@Bean
+	public HealthService healthService() {
+		return new HealthService();
+	}
 }
