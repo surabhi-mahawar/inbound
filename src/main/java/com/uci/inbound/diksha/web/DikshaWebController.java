@@ -8,6 +8,7 @@ import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
 import com.uci.utils.kafka.SimpleProducer;
+import com.uci.utils.kafka.SimpleProducer1;
 
 import io.opentelemetry.api.trace.Tracer;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,7 @@ public class DikshaWebController {
     private SunbirdWebPortalAdapter sunbirdWebPortalAdapter;
 
     @Autowired
-    public SimpleProducer kafkaProducer;
+    public SimpleProducer1 kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;

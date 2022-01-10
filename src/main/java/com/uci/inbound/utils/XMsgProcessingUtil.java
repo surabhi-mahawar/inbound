@@ -9,6 +9,7 @@ import com.uci.dao.repository.XMessageRepository;
 import com.uci.dao.utils.XMessageDAOUtils;
 import com.uci.utils.BotService;
 import com.uci.utils.kafka.SimpleProducer;
+import com.uci.utils.kafka.SimpleProducer1;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
@@ -45,7 +46,7 @@ public class XMsgProcessingUtil {
 
 	AbstractProvider adapter;
 	CommonMessage inboundMessage;
-	SimpleProducer kafkaProducer;
+	SimpleProducer1 kafkaProducer;
 	XMessageRepository xMsgRepo;
 	String topicSuccess;
 	String topicFailure;
@@ -111,7 +112,7 @@ public class XMsgProcessingUtil {
 																							.getTextMapPropagator()
 																							.inject(currentContext,
 																									xmsg, null);
-																					sendEventToKafka(xmsg);
+																					sendEventToKafka(xmsg, currentContext);
 																					childSpan6.end();
 																					rootSpan.end();
 																				});
@@ -132,7 +133,7 @@ public class XMsgProcessingUtil {
 //													log.info("current context l2: " + currentContext);
 													GlobalOpenTelemetry.getPropagators().getTextMapPropagator()
 															.inject(currentContext, xmsg, null);
-													sendEventToKafka(xmsg);
+													sendEventToKafka(xmsg, currentContext);
 //													log.info("current context lc2: " + currentContext);
 													childSpan4.end();
 													rootSpan.end();
@@ -210,14 +211,14 @@ public class XMsgProcessingUtil {
 		return !xmsg.getMessageState().equals(XMessage.MessageState.REPLIED);
 	}
 
-	private void sendEventToKafka(XMessage xmsg) {
+	private void sendEventToKafka(XMessage xmsg, Context currentContext) {
 		String xmessage = null;
 		try {
 			xmessage = xmsg.toXML();
 		} catch (JAXBException e) {
-			kafkaProducer.send(topicFailure, inboundMessage.toString());
+			kafkaProducer.send(topicFailure, inboundMessage.toString(), currentContext);
 		}
-		kafkaProducer.send(topicSuccess, xmessage);
+		kafkaProducer.send(topicSuccess, xmessage, currentContext);
 	}
 
 	private Mono<XMessageDAO> getLatestXMessage(String userID, XMessage.MessageState messageState) {

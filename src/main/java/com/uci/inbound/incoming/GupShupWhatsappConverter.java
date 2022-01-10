@@ -8,6 +8,7 @@ import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.utils.kafka.SimpleProducer;
+import com.uci.utils.kafka.SimpleProducer1;
 
 import io.opentelemetry.api.trace.Tracer;
 
@@ -40,7 +41,7 @@ public class GupShupWhatsappConverter {
     private GupShupWhatsappAdapter gupShupWhatsappAdapter;
 
     @Autowired
-    public SimpleProducer kafkaProducer;
+    public SimpleProducer1 kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepository;

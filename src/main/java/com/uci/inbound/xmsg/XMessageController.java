@@ -77,4 +77,12 @@ public class XMessageController {
 			xMsgRepo.delete(xMsgDao).subscribe();
 		});
 	}
+	
+	@RequestMapping(value = "/user/dataByUserId/{userId}", method = RequestMethod.DELETE, produces = {
+			"application/json", "text/json" })
+	public void deleteAllByMobile(@PathVariable("userId") String userid) {
+		xMsgRepo.findAllByUserId(userid).subscribe(xMsgDao -> {
+			xMsgRepo.delete(xMsgDao).subscribe();
+		});
+	}
 }
