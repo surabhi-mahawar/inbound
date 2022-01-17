@@ -38,7 +38,7 @@ public class NetcoreWhatsappConverter {
     private NetcoreWhatsappAdapter netcoreWhatsappAdapter;
 
     @Autowired
-    public SimpleProducer1 kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;

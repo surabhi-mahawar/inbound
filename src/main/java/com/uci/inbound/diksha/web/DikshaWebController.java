@@ -38,7 +38,7 @@ public class DikshaWebController {
     private SunbirdWebPortalAdapter sunbirdWebPortalAdapter;
 
     @Autowired
-    public SimpleProducer1 kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;

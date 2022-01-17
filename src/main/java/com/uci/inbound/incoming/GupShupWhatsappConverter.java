@@ -41,7 +41,7 @@ public class GupShupWhatsappConverter {
     private GupShupWhatsappAdapter gupShupWhatsappAdapter;
 
     @Autowired
-    public SimpleProducer1 kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepository;

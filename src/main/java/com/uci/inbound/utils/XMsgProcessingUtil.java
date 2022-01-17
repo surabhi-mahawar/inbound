@@ -46,7 +46,7 @@ public class XMsgProcessingUtil {
 
 	AbstractProvider adapter;
 	CommonMessage inboundMessage;
-	SimpleProducer1 kafkaProducer;
+	SimpleProducer kafkaProducer;
 	XMessageRepository xMsgRepo;
 	String topicSuccess;
 	String topicFailure;
@@ -54,89 +54,50 @@ public class XMsgProcessingUtil {
 	Tracer tracer;
 
 	public void process() throws JsonProcessingException {
-		Span rootSpan = tracer.spanBuilder("inbound-processMessage").startSpan();
 
 		int data;
 		log.info("incoming message {}", new ObjectMapper().writeValueAsString(inboundMessage));
-		try (Scope scope = rootSpan.makeCurrent()) {
-			Context currentContext = Context.current();
-			Span childSpan1 = createChildSpan("convertMessageToXMsg", currentContext, rootSpan);
+		try {
 			adapter.convertMessageToXMsg(inboundMessage)
-					.doOnError(genericError("convertMessageToXMsg", childSpan1))
+					.doOnError(genericError("convertMessageToXMsg"))
 					.subscribe(xmsg -> {
-						childSpan1.end();
-						Span childSpan2 = createChildSpan("getAppName", currentContext, rootSpan);
 						getAppName(xmsg.getPayload().getText(), xmsg.getFrom())
-								.doOnError(genericError("getAppName", childSpan2))
+								.doOnError(genericError("getAppName"))
 								.subscribe(appName -> {
-									childSpan2.end();
 									xmsg.setApp(appName);
 									XMessageDAO currentMessageToBeInserted = XMessageDAOUtils
 											.convertXMessageToDAO(xmsg);
 									if (isCurrentMessageNotAReply(xmsg)) {
-										Span childSpan3 = createChildSpan("getLatestXMessage", currentContext,
-												rootSpan);
 										String whatsappId = xmsg.getMessageId().getChannelMessageId();
 										getLatestXMessage(xmsg.getFrom().getUserID(), XMessage.MessageState.REPLIED)
-												.doOnError(genericError("getLatestXMessage", childSpan3))
+												.doOnError(genericError("getLatestXMessage"))
 												.subscribe(new Consumer<XMessageDAO>() {
 													@Override
 													public void accept(XMessageDAO previousMessage) {
-														childSpan3.end();
-														Span childSpan4 = createChildSpan(
-																"updatePreviousXMessage", currentContext,
-																rootSpan);
 														previousMessage.setMessageId(whatsappId);
 														xMsgRepo.save(previousMessage)
 																.doOnError(genericError(
-																		"updatePreviousXMessage", childSpan4))
+																		"updatePreviousXMessage"))
 																.subscribe(new Consumer<XMessageDAO>() {
 																	@Override
 																	public void accept(
 																			XMessageDAO updatedPreviousMessage) {
-																		childSpan4.end();
-																		Span childSpan5 = createChildSpan(
-																				"insertXmessage",
-																				currentContext, rootSpan);
 																		xMsgRepo.insert(currentMessageToBeInserted)
 																				.doOnError(genericError(
-																						"insertXmessage", childSpan5))
+																						"insertXmessage"))
 																				.subscribe(insertedMessage -> {
-																					childSpan5.end();
-																					Span childSpan6 = createChildSpan(
-																							"sendEventToKafka",
-																							currentContext, rootSpan);
-//																					log.info("current context l1: "
-//																							+ currentContext);
-																					GlobalOpenTelemetry.getPropagators()
-																							.getTextMapPropagator()
-																							.inject(currentContext,
-																									xmsg, null);
-																					sendEventToKafka(xmsg, currentContext);
-																					childSpan6.end();
-																					rootSpan.end();
+																					sendEventToKafka(xmsg);
 																				});
 																	}
 																});
 													}
 												});
 									} else {
-										Span childSpan3 = createChildSpan("insertXmessage", currentContext,
-												rootSpan);
 										xMsgRepo.insert(currentMessageToBeInserted)
 												.doOnError(
-														genericError("insertXmessage", childSpan3))
+														genericError("insertXmessage"))
 												.subscribe(xMessageDAO -> {
-													childSpan3.end();
-													Span childSpan4 = createChildSpan("sendEventToKafka",
-															currentContext, rootSpan);
-//													log.info("current context l2: " + currentContext);
-													GlobalOpenTelemetry.getPropagators().getTextMapPropagator()
-															.inject(currentContext, xmsg, null);
-													sendEventToKafka(xmsg, currentContext);
-//													log.info("current context lc2: " + currentContext);
-													childSpan4.end();
-													rootSpan.end();
+													sendEventToKafka(xmsg);
 												});
 									}
 								});
@@ -145,11 +106,9 @@ public class XMsgProcessingUtil {
 
 		} catch (JAXBException e) {
 			e.printStackTrace();
-			genericException(e.getMessage(), rootSpan);
+			genericException(e.getMessage());
 		} catch (Throwable e) {
-			genericException(e.getMessage(), rootSpan);
-		} finally {
-//			rootSpan.end();
+			genericException(e.getMessage());
 		}
 	}
 
@@ -188,6 +147,15 @@ public class XMsgProcessingUtil {
 			span.end();
 		}
 	}
+	
+	/**
+	 * Log Exceptions
+	 * @param eMsg
+	 */
+	private void genericException(String eMsg) {
+		eMsg = "Exception: " + eMsg;
+		log.error(eMsg);
+	}
 
 	/**
 	 * Log Exception & if span exists, add error to span 
@@ -206,19 +174,31 @@ public class XMsgProcessingUtil {
 			}
 		};
 	}
+	
+	/**
+	 * Log Exception
+	 * @param s
+	 * @return
+	 */
+	private Consumer<Throwable> genericError(String s) {
+		return c -> {
+			String msg = "Error in " + s + "::" + c.getMessage();
+			log.error(msg);
+		};
+	}
 
 	private boolean isCurrentMessageNotAReply(XMessage xmsg) {
 		return !xmsg.getMessageState().equals(XMessage.MessageState.REPLIED);
 	}
 
-	private void sendEventToKafka(XMessage xmsg, Context currentContext) {
+	private void sendEventToKafka(XMessage xmsg) {
 		String xmessage = null;
 		try {
 			xmessage = xmsg.toXML();
 		} catch (JAXBException e) {
-			kafkaProducer.send(topicFailure, inboundMessage.toString(), currentContext);
+			kafkaProducer.send(topicFailure, inboundMessage.toString());
 		}
-		kafkaProducer.send(topicSuccess, xmessage, currentContext);
+		kafkaProducer.send(topicSuccess, xmessage);
 	}
 
 	private Mono<XMessageDAO> getLatestXMessage(String userID, XMessage.MessageState messageState) {

@@ -40,7 +40,7 @@ public class CDACConverter {
     private CdacBulkSmsAdapter cdacBulkSmsAdapter;
 
     @Autowired
-    public SimpleProducer1 kafkaProducer;
+    public SimpleProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;
