@@ -31,6 +31,9 @@ public class NetcoreWhatsappConverter {
 
     @Value("${inbound-error}")
     private String inboundError;
+    
+    @Value("${inbound-integrity-test}")
+    private String inboundIntegrityTest;
 
     private NetcoreWhatsappAdapter netcoreWhatsappAdapter;
 
@@ -58,6 +61,7 @@ public class NetcoreWhatsappConverter {
                 .inboundMessage(message.getMessages()[0])
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
+                .topicIntegrityTest(inboundIntegrityTest)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
                 .build()

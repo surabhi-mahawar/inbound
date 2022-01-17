@@ -34,7 +34,7 @@ public class XMsgProcessingUtil {
     String topicSuccess;
     String topicFailure;
     BotService botService;
-
+    String topicIntegrityTest;
 
     public void process() throws JsonProcessingException {
 
@@ -104,6 +104,7 @@ public class XMsgProcessingUtil {
             kafkaProducer.send(topicFailure, inboundMessage.toString());
         }
         kafkaProducer.send(topicSuccess, xmessage);
+        kafkaProducer.send(topicIntegrityTest, xmessage);
     }
 
     private Mono<XMessageDAO> getLatestXMessage(String userID, XMessage.MessageState messageState) {
