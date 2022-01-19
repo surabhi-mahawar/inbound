@@ -6,7 +6,7 @@ import com.uci.adapter.netcore.whatsapp.NetcoreWhatsappAdapter;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.kafka.SimpleProducer;
-import com.uci.utils.kafka.SimpleProducer1;
+import com.uci.utils.kafka.RecordProducer;
 
 import io.opentelemetry.api.trace.Tracer;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class NetcoreWhatsappConverter {
     private NetcoreWhatsappAdapter netcoreWhatsappAdapter;
 
     @Autowired
-    public SimpleProducer kafkaProducer;
+    public RecordProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;
@@ -51,24 +51,7 @@ public class NetcoreWhatsappConverter {
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void netcoreWhatsApp(@RequestBody NetcoreMessageFormat message) throws JsonProcessingException, JAXBException {
-
-    	log.info("getApp: "+message.getMessages()[0].getApp());
-    	log.info("getEventType: "+message.getMessages()[0].getEventType());
-    	log.info("getMessageId: "+message.getMessages()[0].getMessageId());
-    	log.info("getMobile: "+message.getMessages()[0].getMobile());
-    	log.info("getName: "+message.getMessages()[0].getName());
-    	log.info("getReplyId: "+message.getMessages()[0].getReplyId());
-    	log.info("getSource: "+message.getMessages()[0].getSource());
-    	log.info("getType: "+message.getMessages()[0].getType());
-    	log.info("getWaNumber: "+message.getMessages()[0].getWaNumber());
-    	log.info("getText: "+message.getMessages()[0].getText());
-    	log.info("getVersion: "+message.getMessages()[0].getVersion());
-//    	log.info("getWaNumber: "+message.getMessages()[0].getWaNumber());
-//    	log.info("getWaNumber: "+message.getMessages()[0].getWaNumber());
-    	
-    			System.out.println(message.toString());
-
-        netcoreWhatsappAdapter = NetcoreWhatsappAdapter.builder()
+    	netcoreWhatsappAdapter = NetcoreWhatsappAdapter.builder()
                 .botservice(botService)
                 .build();
 

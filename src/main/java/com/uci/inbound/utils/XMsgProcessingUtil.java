@@ -9,7 +9,7 @@ import com.uci.dao.repository.XMessageRepository;
 import com.uci.dao.utils.XMessageDAOUtils;
 import com.uci.utils.BotService;
 import com.uci.utils.kafka.SimpleProducer;
-import com.uci.utils.kafka.SimpleProducer1;
+import com.uci.utils.kafka.RecordProducer;
 
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
@@ -46,7 +46,7 @@ public class XMsgProcessingUtil {
 
 	AbstractProvider adapter;
 	CommonMessage inboundMessage;
-	SimpleProducer kafkaProducer;
+	RecordProducer kafkaProducer;
 	XMessageRepository xMsgRepo;
 	String topicSuccess;
 	String topicFailure;
@@ -86,7 +86,7 @@ public class XMsgProcessingUtil {
 																				.doOnError(genericError(
 																						"insertXmessage"))
 																				.subscribe(insertedMessage -> {
-																					sendEventToKafka(xmsg);
+																					sendEventToKafka(xmsg, Context.current());
 																				});
 																	}
 																});
@@ -97,7 +97,7 @@ public class XMsgProcessingUtil {
 												.doOnError(
 														genericError("insertXmessage"))
 												.subscribe(xMessageDAO -> {
-													sendEventToKafka(xmsg);
+													sendEventToKafka(xmsg, Context.current());
 												});
 									}
 								});
@@ -191,14 +191,14 @@ public class XMsgProcessingUtil {
 		return !xmsg.getMessageState().equals(XMessage.MessageState.REPLIED);
 	}
 
-	private void sendEventToKafka(XMessage xmsg) {
+	private void sendEventToKafka(XMessage xmsg, Context currentContext) {
 		String xmessage = null;
 		try {
 			xmessage = xmsg.toXML();
 		} catch (JAXBException e) {
-			kafkaProducer.send(topicFailure, inboundMessage.toString());
+			kafkaProducer.send(topicFailure, inboundMessage.toString(), currentContext);
 		}
-		kafkaProducer.send(topicSuccess, xmessage);
+		kafkaProducer.send(topicSuccess, xmessage, currentContext);
 	}
 
 	private Mono<XMessageDAO> getLatestXMessage(String userID, XMessage.MessageState messageState) {

@@ -6,7 +6,7 @@ import com.uci.adapter.Request.CommonMessage;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.kafka.SimpleProducer;
-import com.uci.utils.kafka.SimpleProducer1;
+import com.uci.utils.kafka.RecordProducer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class CDACConverter {
     private CdacBulkSmsAdapter cdacBulkSmsAdapter;
 
     @Autowired
-    public SimpleProducer kafkaProducer;
+    public RecordProducer kafkaProducer;
 
     @Autowired
     public XMessageRepository xmsgRepo;
