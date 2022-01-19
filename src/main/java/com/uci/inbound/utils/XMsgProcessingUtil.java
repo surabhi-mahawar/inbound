@@ -61,12 +61,16 @@ public class XMsgProcessingUtil {
 			adapter.convertMessageToXMsg(inboundMessage)
 					.doOnError(genericError("convertMessageToXMsg"))
 					.subscribe(xmsg -> {
+						Span childSpan1 = createChildSpan("getAppName");
 						getAppName(xmsg.getPayload().getText(), xmsg.getFrom())
 								.doOnError(genericError("getAppName"))
 								.subscribe(appName -> {
+									childSpan1.end();
 									xmsg.setApp(appName);
+									Span childSpan2 = createChildSpan("convertXMessageToDAO");
 									XMessageDAO currentMessageToBeInserted = XMessageDAOUtils
 											.convertXMessageToDAO(xmsg);
+									childSpan2.end();
 									if (isCurrentMessageNotAReply(xmsg)) {
 										String whatsappId = xmsg.getMessageId().getChannelMessageId();
 										getLatestXMessage(xmsg.getFrom().getUserID(), XMessage.MessageState.REPLIED)
@@ -93,11 +97,15 @@ public class XMsgProcessingUtil {
 													}
 												});
 									} else {
+										Span childSpan3 = createChildSpan("insertXmessage");										
 										xMsgRepo.insert(currentMessageToBeInserted)
 												.doOnError(
 														genericError("insertXmessage"))
 												.subscribe(xMessageDAO -> {
+													childSpan3.end();
+													Span childSpan4 = createChildSpan("sendEventToKafka");
 													sendEventToKafka(xmsg, Context.current());
+													childSpan4.end();
 												});
 									}
 								});
@@ -120,8 +128,18 @@ public class XMsgProcessingUtil {
 	 * @return childSpan
 	 */
 	private Span createChildSpan(String spanName, Context context, Span parentSpan) {
-		String prefix = "inbound-";
+		String prefix = "inboundSpan-";
 		return tracer.spanBuilder(prefix + spanName).setParent(context.with(parentSpan)).startSpan();
+	}
+	
+	/**
+	 * Create Child Span
+	 * @param spanName
+	 * @return childSpan
+	 */
+	private Span createChildSpan(String spanName) {
+		String prefix = "inbound-";
+		return tracer.spanBuilder(prefix + spanName).startSpan();
 	}
 
 	private void propagateContext(Context currectContext, XMessage xmsg) {
