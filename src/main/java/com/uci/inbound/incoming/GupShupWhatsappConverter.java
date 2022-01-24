@@ -47,7 +47,8 @@ public class GupShupWhatsappConverter {
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void gupshupWhatsApp(@Valid GSWhatsAppMessage message) throws JsonProcessingException, JAXBException {
-
+    	log.info("message:" +message);
+    	
         gupShupWhatsappAdapter = GupShupWhatsappAdapter.builder()
                 .botservice(botService)
                 .xmsgRepo(xmsgRepository)
