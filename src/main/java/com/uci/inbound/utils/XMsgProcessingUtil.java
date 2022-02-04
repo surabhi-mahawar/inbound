@@ -51,6 +51,7 @@ public class XMsgProcessingUtil {
     public void process() throws JsonProcessingException {
 
         log.info("incoming message {}", new ObjectMapper().writeValueAsString(inboundMessage));
+        
         try {
             adapter.convertMessageToXMsg(inboundMessage)
                     .doOnError(genericError("Error in converting to XMessage by Adapter"))
