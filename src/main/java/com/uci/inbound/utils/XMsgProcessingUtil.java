@@ -58,55 +58,34 @@ public class XMsgProcessingUtil {
                     .subscribe(xmsg -> {
                         getAppName(xmsg.getPayload().getText(), xmsg.getFrom())
                                 .subscribe(resultPair -> {
+                                	log.info("getAppName response:"+resultPair);
                                 	/* If bot is invalid, send error message to outbound, else process message */
                                     if(!resultPair.getLeft()) {
-                                    	ObjectNode botNode = (ObjectNode) ((Pair<Object, String>) resultPair.getRight()).getLeft();
-                                    	String message = ((Pair<Object, String>) resultPair.getRight()).getRight().toString();
-                                    	xmsg.setApp(botNode.path("result").path("data").path("name").asText());
-                                    	XMessageDAO currentMessageToBeInserted = XMessageDAOUtils.convertXMessageToDAO(xmsg);
-                                    	xMsgRepo.insert(currentMessageToBeInserted)
-	                                        .doOnError(genericError("Error in inserting current message"))
-	                                        .subscribe(xMessageDAO -> {
-	                                        	SenderReceiverInfo to = SenderReceiverInfo.builder().userID(xmsg.getFrom().getUserID()).build();
-	                                        	xmsg.setTo(to);
-	                                        	xmsg.setAdapterId((((JsonNode) ((ArrayNode) botNode.path("result").path("data").path("logic"))).get(0).path("adapter")).asText());
-	                                        	XMessagePayload payload = XMessagePayload.builder().text(message).build();
-	                                        	xmsg.setPayload(payload);
-	                                        	sendEventToOutboundKafka(xmsg);
-	                                        });
+                                    	log.info("Bot is invalid");
+                                    	processInvalidBotMessage(xmsg, (Pair<Object, String>) resultPair.getRight());
                                     } else {
-                                    	String appName = resultPair.getRight().toString();
-                                        xmsg.setApp(appName);
-                                        XMessageDAO currentMessageToBeInserted = XMessageDAOUtils.convertXMessageToDAO(xmsg);
-                                    	if (isCurrentMessageNotAReply(xmsg)) {
-                                            String whatsappId = xmsg.getMessageId().getChannelMessageId();
-                                            getLatestXMessage(xmsg.getFrom().getUserID(), XMessage.MessageState.REPLIED)
-                                                    .doOnError(genericError("Error in getting last message"))
-                                                    .subscribe(new Consumer<XMessageDAO>() {
-                                                        @Override
-                                                        public void accept(XMessageDAO previousMessage) {
-                                                            previousMessage.setMessageId(whatsappId);
-                                                            xMsgRepo.save(previousMessage)
-                                                                    .doOnError(genericError("Error in saving previous message"))
-                                                                    .subscribe(new Consumer<XMessageDAO>() {
-                                                                        @Override
-                                                                        public void accept(XMessageDAO updatedPreviousMessage) {
-                                                                            xMsgRepo.insert(currentMessageToBeInserted)
-                                                                                    .doOnError(genericError("Error in inserting current message"))
-                                                                                    .subscribe(insertedMessage -> {
-                                                                                        sendEventToKafka(xmsg);
-                                                                                    });
-                                                                        }
-                                                                    });
-                                                        }
-                                                    });
-                                        } else {
-                                            xMsgRepo.insert(currentMessageToBeInserted)
-                                                    .doOnError(genericError("Error in inserting current message"))
-                                                    .subscribe(xMessageDAO -> {
-                                                        sendEventToKafka(xmsg);
-                                                    });
-                                        }
+                                    	Pair<Boolean, String> checkBotPair = (Pair<Boolean, String>) resultPair.getRight();
+                                    	/* If bot check required, validate bot, else process message */
+                                    	if(checkBotPair.getLeft()) {
+                                    		log.info("Bot check required.");
+                                    		validateBot(checkBotPair.getRight().toString())
+                                    			.subscribe(resPair -> {
+                                    				log.info("ValidateBot response:"+resPair);
+                                    				/* If bot is invalid, send error message to outbound, else process message */
+                                                    if(!resPair.getLeft()) {
+                                                    	log.info("Bot is invalid");
+                                                    	processInvalidBotMessage(xmsg, (Pair<Object, String>) resPair.getRight());
+                                                    } else {
+                                                    	log.info("Process bot message");
+                                                    	String appName = resPair.getRight().toString();
+                                                    	processBotMessage(xmsg, appName);
+                                                    }
+                                    			});
+                                    	} else {
+                                    		log.info("Process bot message");
+                                    		String appName = checkBotPair.getRight().toString();
+                                        	processBotMessage(xmsg, appName);
+                                    	}
                                     }
                                 });
 
@@ -117,6 +96,108 @@ public class XMsgProcessingUtil {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Process Bot Invalid Message - Send bot invalid message to outbound to process
+     * @param xmsg
+     * @param botDataPair
+     */
+    private void processInvalidBotMessage(XMessage xmsg, Pair<Object, String> botDataPair) {
+    	ObjectNode botNode = (ObjectNode) botDataPair.getLeft();
+    	String message = botDataPair.getRight().toString();
+    	xmsg.setApp(botNode.path("name").asText());
+    	XMessageDAO currentMessageToBeInserted = XMessageDAOUtils.convertXMessageToDAO(xmsg);
+    
+    	String campaignId;
+    	if(botNode.path("logic").get(0).path("adapter").findValue("id") != null) {
+			campaignId = botNode.path("logic").get(0).path("adapter").findValue("id").asText();
+		} else {
+			campaignId = botNode.path("logic").get(0).path("adapter").asText();
+		}
+    	
+    	xMsgRepo.insert(currentMessageToBeInserted)
+            .doOnError(genericError("Error in inserting current message"))
+            .subscribe(xMessageDAO -> {
+            	SenderReceiverInfo to = SenderReceiverInfo.builder().userID(xmsg.getFrom().getUserID()).build();
+            	xmsg.setTo(to);
+            	xmsg.setAdapterId(campaignId);
+            	XMessagePayload payload = XMessagePayload.builder().text(message).build();
+            	xmsg.setPayload(payload);
+            	sendEventToOutboundKafka(xmsg);
+            });
+    }
+    
+    /**
+     * Process Bot Message - send message to orchestrator for processing
+     * @param xmsg
+     * @param appName
+     */
+    private void processBotMessage(XMessage xmsg, String appName) {
+    	xmsg.setApp(appName);
+        XMessageDAO currentMessageToBeInserted = XMessageDAOUtils.convertXMessageToDAO(xmsg);
+    	if (isCurrentMessageNotAReply(xmsg)) {
+            String whatsappId = xmsg.getMessageId().getChannelMessageId();
+            getLatestXMessage(xmsg.getFrom().getUserID(), XMessage.MessageState.REPLIED)
+                    .doOnError(genericError("Error in getting last message"))
+                    .subscribe(new Consumer<XMessageDAO>() {
+                        @Override
+                        public void accept(XMessageDAO previousMessage) {
+                            previousMessage.setMessageId(whatsappId);
+                            xMsgRepo.save(previousMessage)
+                                    .doOnError(genericError("Error in saving previous message"))
+                                    .subscribe(new Consumer<XMessageDAO>() {
+                                        @Override
+                                        public void accept(XMessageDAO updatedPreviousMessage) {
+                                            xMsgRepo.insert(currentMessageToBeInserted)
+                                                    .doOnError(genericError("Error in inserting current message"))
+                                                    .subscribe(insertedMessage -> {
+                                                        sendEventToKafka(xmsg);
+                                                    });
+                                        }
+                                    });
+                        }
+                    });
+        } else {
+            xMsgRepo.insert(currentMessageToBeInserted)
+                    .doOnError(genericError("Error in inserting current message"))
+                    .subscribe(xMessageDAO -> {
+                        sendEventToKafka(xmsg);
+                    });
+        }
+    }
+
+    /**
+     * Validate Bot & return app name as pair of 
+     	* Pair<is bot valid: true, Bot Name>
+     	* Pair<is bot valid: false, Pair<Bot Json, Bot Invalid Error Message>>
+     * @param botName
+     * @return
+     */
+    private Mono<Pair<Boolean, Object>> validateBot(String botName) {
+    	try {
+    		return botService.getBotFromName(botName)
+            		.flatMap(new Function<JsonNode, Mono<? extends Pair<Boolean, Object>>>() {
+                        @Override
+                        public Mono<Pair<Boolean, Object>> apply(JsonNode botNode) {
+                        	log.info("validateBot botNode:"+botNode);
+                        	if(botNode != null && !botNode.path("result").isEmpty()) {
+                        		String botValid= BotUtil.getBotValidFromJsonNode(botNode.path("result").path("data").get(0));
+                            	if(!botValid.equals("true")) {
+                            		return Mono.just(Pair.of(false, Pair.of(botNode.path("result").path("data").get(0), botValid)));
+    							}
+                            	
+                        	}
+                        	JsonNode name = botNode.path("result").path("data").get(0).path("name");
+                        	String appName1 = name.asText();
+                            return Mono.just(Pair.of(true, (appName1 == null || appName1.isEmpty()) ? "finalAppName" : appName1));
+                        }
+                    });
+    	} catch (Exception e) {
+    		log.error("Exception in validateBot: "+e.getMessage());
+    		return Mono.just(Pair.of(true, "finalAppName"));
+    	}
+    }
+
 
     private Consumer<Throwable> genericError(String s) {
         return c -> {
@@ -172,6 +253,14 @@ public class XMsgProcessingUtil {
                 });
     }
 
+    /**
+     * Get App name as pair of 
+     	* Pair<is bot valid: true, Pair<Is Bot Check Needed, Bot Name>>
+     	* Pair<is bot valid: false, Pair<Bot Json, Bot Invalid Error Message>> 
+     * @param text
+     * @param from
+     * @return
+     */
     private Mono<Pair<Boolean, Object>> getAppName(String text, SenderReceiverInfo from) {
     	LocalDateTime yesterday = LocalDateTime.now().minusDays(1L);
         if (text.equals("")) {
@@ -179,30 +268,29 @@ public class XMsgProcessingUtil {
                 return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                     @Override
                     public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
-                    	return Pair.of(true, xMessageLast.getApp());
+                    	return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
                     }
                 }).doOnError(genericError("Error in getting latest xmessage"));
             } catch (Exception e2) {
                 return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                     @Override
                     public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
-                        return Pair.of(true, xMessageLast.getApp());
+                        return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
                     }
                 }).doOnError(genericError("Error in getting latest xmessage - catch"));
             }
         } else {
             try {
-            	log.error("getCampaignFromStartingMessage text: "+text);
-                return botService.getBotFromStartingMessage(text)
+            	return botService.getBotFromStartingMessage(text)
                 		.flatMap(new Function<JsonNode, Mono<? extends Pair<Boolean, Object>>>() {
                             @Override
                             public Mono<Pair<Boolean, Object>> apply(JsonNode botNode) {
                             	log.info("botNode:"+botNode);
                             	String appName1 = null;
                             	if(botNode != null && !botNode.path("result").isEmpty()) {
-                            		String botValid= BotUtil.getBotValidFromJsonNode(botNode);
+                            		String botValid= BotUtil.getBotValidFromJsonNode(botNode.path("result").path("data"));
                                 	if(!botValid.equals("true")) {
-                                		return Mono.just(Pair.of(false, Pair.of(botNode, botValid)));
+                                		return Mono.just(Pair.of(false, Pair.of(botNode.path("result").path("data"), botValid)));
     								}
                                 	JsonNode name = botNode.path("result").path("data").path("name");
     								appName1 = name.asText();
@@ -214,19 +302,19 @@ public class XMsgProcessingUtil {
                                         return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                                             @Override
                                             public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
-                                                return Pair.of(true, (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp());
+                                                return Pair.of(true, Pair.of(true, (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp()));
                                             }
                                         }).doOnError(genericError("Error in getting latest xmessage when app name empty"));
                                     } catch (Exception e2) {
                                         return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                                             @Override
                                             public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
-                                                return Pair.of(true, (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp());
+                                                return Pair.of(true, Pair.of(true, (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp()));
                                             }
                                         }).doOnError(genericError("Error in getting latest xmessage when app name empty - catch"));
                                     }
                                 }
-                                return Mono.just(Pair.of(true, (appName1 == null || appName1.isEmpty()) ? "finalAppName" : appName1));
+                                return Mono.just(Pair.of(true, Pair.of(false, (appName1 == null || appName1.isEmpty()) ? "finalAppName" : appName1)));
                             }
                         });
             } catch (Exception e) {
@@ -235,21 +323,22 @@ public class XMsgProcessingUtil {
                     return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                         @Override
                         public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
-                            return Pair.of(true, xMessageLast.getApp());
+                            return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
                         }
                     }).doOnError(genericError("Error in getting latest xmessage when exception in getCampaignFromStartingMessage"));
                 } catch (Exception e2) {
+                	Pair<Boolean, Object> message1 = Pair.of(false, null);
                     return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                         @Override
                         public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
-                            return Pair.of(true, xMessageLast.getApp());
+                        	return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
                         }
                     }).doOnError(genericError("Error in getting latest xmessage when exception in getCampaignFromStartingMessage - catch"));
                 }
             }
         }
     }
-
+    
     private Mono<XMessageDAO> getLatestXMessage(String userID, LocalDateTime yesterday, String messageState) {
         return xMsgRepo.findAllByUserIdAndTimestampAfter(userID, yesterday)
                 .collectList()
