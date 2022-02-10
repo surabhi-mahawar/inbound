@@ -265,7 +265,7 @@ public class XMsgProcessingUtil {
     	LocalDateTime yesterday = LocalDateTime.now().minusDays(1L);
         if (text.equals("")) {
             try {
-                return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
+            	return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                     @Override
                     public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
                     	return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
@@ -298,10 +298,12 @@ public class XMsgProcessingUtil {
                             		appName1 = null;
                             	}
                             	if (appName1 == null || appName1.equals("")) {
+                            		log.info("getLatestXMessage user id 1: "+from.getUserID()+", yesterday: "+yesterday+", status: "+XMessage.MessageState.SENT.name());
                                     try {
                                         return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                                             @Override
                                             public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
+                                            	log.info("getApp 1: "+xMessageLast.getApp());
                                                 return Pair.of(true, Pair.of(true, (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp()));
                                             }
                                         }).doOnError(genericError("Error in getting latest xmessage when app name empty"));
@@ -309,6 +311,7 @@ public class XMsgProcessingUtil {
                                         return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                                             @Override
                                             public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
+                                            	log.info("getApp 2: "+xMessageLast.getApp());
                                                 return Pair.of(true, Pair.of(true, (xMessageLast.getApp() == null || xMessageLast.getApp().isEmpty()) ? "finalAppName" : xMessageLast.getApp()));
                                             }
                                         }).doOnError(genericError("Error in getting latest xmessage when app name empty - catch"));
@@ -319,10 +322,12 @@ public class XMsgProcessingUtil {
                         });
             } catch (Exception e) {
             	log.error("Exception in getCampaignFromStartingMessage :"+e.getMessage());
+            	log.info("getLatestXMessage user id 2: "+from.getUserID()+", yesterday: "+yesterday+", status: "+XMessage.MessageState.SENT.name());
                 try {
                     return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                         @Override
                         public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
+                        	log.info("getApp 21: "+xMessageLast.getApp());
                             return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
                         }
                     }).doOnError(genericError("Error in getting latest xmessage when exception in getCampaignFromStartingMessage"));
@@ -331,6 +336,7 @@ public class XMsgProcessingUtil {
                     return getLatestXMessage(from.getUserID(), yesterday, XMessage.MessageState.SENT.name()).map(new Function<XMessageDAO, Pair<Boolean, Object>>() {
                         @Override
                         public Pair<Boolean, Object> apply(XMessageDAO xMessageLast) {
+                        	log.info("getApp 22: "+xMessageLast.getApp());
                         	return Pair.of(true, Pair.of(true, xMessageLast.getApp()));
                         }
                     }).doOnError(genericError("Error in getting latest xmessage when exception in getCampaignFromStartingMessage - catch"));
