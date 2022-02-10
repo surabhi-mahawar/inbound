@@ -31,6 +31,9 @@ public class NetcoreWhatsappConverter {
 
     @Value("${inbound-error}")
     private String inboundError;
+    
+    @Value("${outbound}")
+    private String outboundTopic;
 
     private NetcoreWhatsappAdapter netcoreWhatsappAdapter;
 
@@ -58,6 +61,7 @@ public class NetcoreWhatsappConverter {
                 .inboundMessage(message.getMessages()[0])
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
+                .topicOutbound(outboundTopic)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
                 .build()
