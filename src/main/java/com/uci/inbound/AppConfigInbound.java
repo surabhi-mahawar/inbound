@@ -1,5 +1,6 @@
 package com.uci.inbound;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -11,6 +12,9 @@ import com.uci.dao.service.HealthService;
 
 @Configuration
 public class AppConfigInbound {
+	@Value("${spring.redis.database}")
+	private String redisDb;
+	
 	@Bean
 	public HealthService healthService() {
 		return new HealthService();
@@ -23,6 +27,8 @@ public class AppConfigInbound {
 	      = new JedisConnectionFactory();
 //	    jedisConFactory.setHostName("127.0.0.1");
 //	    jedisConFactory.setPort(6379);
+	    Integer dbIndex = Integer.parseInt(redisDb);
+	    jedisConFactory.setDatabase(dbIndex);
 	    return jedisConFactory;
 	}
 
