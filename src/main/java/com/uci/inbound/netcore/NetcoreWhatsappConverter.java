@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.uci.utils.BotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,9 @@ public class NetcoreWhatsappConverter {
 
     @Autowired
     public BotService botService;
+    
+    @Autowired
+    public RedisTemplate<String, Object> redisTemplate;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void netcoreWhatsApp(@RequestBody NetcoreMessageFormat message) throws JsonProcessingException, JAXBException {
@@ -64,6 +68,7 @@ public class NetcoreWhatsappConverter {
                 .topicOutbound(outboundTopic)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
+                .redisTemplate(redisTemplate)
                 .build()
                 .process();
     }

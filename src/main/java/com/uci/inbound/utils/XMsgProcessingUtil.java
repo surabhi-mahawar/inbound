@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,7 +48,8 @@ public class XMsgProcessingUtil {
     String topicFailure;
     String topicOutbound;
     BotService botService;
-
+    RedisTemplate<String, Object> redisTemplate;
+    HashOperations hashOperations;
 
     public void process() throws JsonProcessingException {
 
@@ -353,7 +356,17 @@ public class XMsgProcessingUtil {
     }
     
     private Mono<XMessageDAO> getLatestXMessage(String userID, LocalDateTime yesterday, String messageState) {
-        return xMsgRepo.findAllByUserIdAndTimestampAfter(userID, yesterday)
+    	hashOperations = redisTemplate.opsForHash();
+        XMessageDAO xMessageDAO = (XMessageDAO)hashOperations.get("XMessageDAO", "7597185708");
+	  	if(xMessageDAO != null) {
+	  		log.info("Redis xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
+			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
+			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
+			", timestamp: "+xMessageDAO.getTimestamp());
+	  		return Mono.just(xMessageDAO);
+	  	}
+        
+    	return xMsgRepo.findAllByUserIdAndTimestampAfter(userID, yesterday)
                 .collectList()
                 .map(new Function<List<XMessageDAO>, XMessageDAO>() {
                     @Override
