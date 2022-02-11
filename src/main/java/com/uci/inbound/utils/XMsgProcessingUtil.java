@@ -118,6 +118,10 @@ public class XMsgProcessingUtil {
     	xMsgRepo.insert(currentMessageToBeInserted)
             .doOnError(genericError("Error in inserting current message"))
             .subscribe(xMessageDAO -> {
+            	SenderReceiverInfo from = xmsg.getFrom();
+            	from.setUserID("admin");
+            	xmsg.setFrom(from);
+            	
             	SenderReceiverInfo to = SenderReceiverInfo.builder().userID(xmsg.getFrom().getUserID()).build();
             	xmsg.setTo(to);
             	xmsg.setAdapterId(campaignId);
