@@ -77,4 +77,13 @@ public class XMessageController {
 			xMsgRepo.delete(xMsgDao).subscribe();
 		});
 	}
+	
+	@RequestMapping(value = "/user/dataByUserId/{userid}", method = RequestMethod.DELETE, produces = { "application/json",
+	"text/json" })
+	public void deleteAllByUserId(@PathVariable("userid") String userid)
+		throws JsonMappingException, JsonProcessingException {
+		xMsgRepo.findAllByUserId(userid).subscribe(xMsgDao -> {
+			xMsgRepo.delete(xMsgDao).subscribe();
+		});
+	}
 }
