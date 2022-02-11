@@ -354,7 +354,7 @@ public class XMsgProcessingUtil {
                 .map(new Function<List<XMessageDAO>, XMessageDAO>() {
                     @Override
                     public XMessageDAO apply(List<XMessageDAO> xMessageDAOS) {
-                    	log.info("xMsgDaos size: "+xMessageDAOS.size()+", messageState.name: "+messageState.name());
+                    	log.info("xMsgDaos size: "+xMessageDAOS.size()+", messageState.name: "+XMessage.MessageState.SENT.name());
                         if (xMessageDAOS.size() > 0) {
                             List<XMessageDAO> filteredList = new ArrayList<>();
                             for (XMessageDAO xMessageDAO : xMessageDAOS) {
