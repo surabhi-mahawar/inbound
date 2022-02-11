@@ -357,8 +357,9 @@ public class XMsgProcessingUtil {
     
     private Mono<XMessageDAO> getLatestXMessage(String userID, LocalDateTime yesterday, String messageState) {
     	hashOperations = redisTemplate.opsForHash();
-        XMessageDAO xMessageDAO = (XMessageDAO)hashOperations.get("XMessageDAO", "7597185708");
+        XMessageDAO xMessageDAO = (XMessageDAO)hashOperations.get(redisKeyWithPrefix("XMessageDAO"), redisKeyWithPrefix(userID));
 	  	if(xMessageDAO != null) {
+	  		log.info("redis key: "+redisKeyWithPrefix("XMessageDAO")+", "+redisKeyWithPrefix(userID));
 	  		log.info("Redis xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
 			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
 			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
@@ -404,5 +405,9 @@ public class XMsgProcessingUtil {
                         return new XMessageDAO();
                     }
                 });
+    }
+    
+    private String redisKeyWithPrefix(String key) {
+    	return System.getenv("ENV")+"-"+key;
     }
 }
