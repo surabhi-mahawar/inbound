@@ -237,15 +237,25 @@ public class XMsgProcessingUtil {
                 .doOnError(genericError(String.format("Unable to find previous Message for userID %s", userID)))
                 .collectList()
                 .map(xMessageDAOS -> {
+                	log.info("xMsgDaos size: "+xMessageDAOS.size()+", messageState.name: "+messageState.name());
                     if (xMessageDAOS.size() > 0) {
                         List<XMessageDAO> filteredList = new ArrayList<>();
                         for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                            if (xMessageDAO.getMessageState().equals(messageState.name()))
-                                filteredList.add(xMessageDAO);
+                        	log.info("xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
+                        			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
+                        			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
+                        			", timestamp: "+xMessageDAO.getTimestamp());
+                            if (xMessageDAO.getMessageState().equals(messageState.name())) {
+                            	filteredList.add(xMessageDAO);
+                            	log.info("Selected xmessageDao");
+                            }
+                                
                         }
                         if (filteredList.size() > 0) {
                             filteredList.sort(Comparator.comparing(XMessageDAO::getTimestamp));
                         }
+                        
+                        log.info("get 0: "+xMessageDAOS.get(0).getId());
 
                         return xMessageDAOS.get(0);
                     }
