@@ -15,20 +15,28 @@ public class AppConfigInbound {
 	@Value("${spring.redis.database}")
 	private String redisDb;
 	
+	@Value("${spring.redis.host}")
+	private String redisHost;
+	
+	@Value("${spring.redis.port}")
+	private String redisPort;
+	
 	@Bean
 	public HealthService healthService() {
 		return new HealthService();
 	}
-	
-	@SuppressWarnings("deprecation")
+
 	@Bean
 	JedisConnectionFactory jedisConnectionFactory() {
-	    JedisConnectionFactory jedisConFactory
+		JedisConnectionFactory jedisConFactory
 	      = new JedisConnectionFactory();
-//	    jedisConFactory.setHostName("127.0.0.1");
-//	    jedisConFactory.setPort(6379);
+	    jedisConFactory.setHostName(redisHost);
+	    Integer port = Integer.parseInt(redisPort);
+	    jedisConFactory.setPort(port);
 	    Integer dbIndex = Integer.parseInt(redisDb);
 	    jedisConFactory.setDatabase(dbIndex);
+//		jedisConFactory.getPoolConfig().setMaxIdle(30);
+//		jedisConFactory.getPoolConfig().setMinIdle(10);
 	    return jedisConFactory;
 	}
 
@@ -37,7 +45,7 @@ public class AppConfigInbound {
 	    RedisTemplate<String, Object> template = new RedisTemplate<>();
 	    template.setConnectionFactory(jedisConnectionFactory());
 	    template.setKeySerializer(new StringRedisSerializer());
-	    template.setValueSerializer(new GenericJackson2JsonRedisSerializer()); 
+	    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 //	    template.setEnableTransactionSupport(true);
 	    return template;
 	}
