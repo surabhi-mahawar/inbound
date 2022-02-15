@@ -34,9 +34,6 @@ public class GupShupWhatsappConverter {
 
     @Value("${inbound-error}")
     private String inboundError;
-    
-    @Value("${outbound}")
-    private String outboundTopic;
 
     private GupShupWhatsappAdapter gupShupWhatsappAdapter;
 
@@ -67,7 +64,6 @@ public class GupShupWhatsappConverter {
                 .inboundMessage(message)
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
-                .topicOutbound(outboundTopic)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
                 .redisTemplate(redisTemplate)
