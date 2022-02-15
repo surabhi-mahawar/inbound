@@ -10,6 +10,7 @@ import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.utils.kafka.SimpleProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,9 +34,6 @@ public class GupShupWhatsappConverter {
 
     @Value("${inbound-error}")
     private String inboundError;
-    
-    @Value("${outbound}")
-    private String outboundTopic;
 
     private GupShupWhatsappAdapter gupShupWhatsappAdapter;
 
@@ -46,7 +44,10 @@ public class GupShupWhatsappConverter {
     public XMessageRepository xmsgRepository;
 
     @Autowired
-    public BotService botService;
+    public BotService botService; 
+    
+    @Autowired
+    public RedisTemplate<String, Object> redisTemplate;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void gupshupWhatsApp(@Valid GSWhatsAppMessage message) throws JsonProcessingException, JAXBException {
@@ -63,9 +64,9 @@ public class GupShupWhatsappConverter {
                 .inboundMessage(message)
                 .topicFailure(inboundError)
                 .topicSuccess(inboundProcessed)
-                .topicOutbound(outboundTopic)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
+                .redisTemplate(redisTemplate)
                 .build()
                 .process();
     }
