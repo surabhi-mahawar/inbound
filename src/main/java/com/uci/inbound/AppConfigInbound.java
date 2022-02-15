@@ -23,9 +23,6 @@ import com.uci.dao.service.HealthService;
 public class AppConfigInbound {
 	@Value("${spring.kafka.bootstrap-servers}")
     private String BOOTSTRAP_SERVERS;
-
-	@Value("${spring.kafka.bootstrap-servers}")
-    	private String BOOTSTRAP_SERVERS;
 	
 	@Value("${spring.redis.database}")
 	private String redisDb;
