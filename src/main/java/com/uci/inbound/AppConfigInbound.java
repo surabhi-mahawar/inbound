@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -21,7 +22,7 @@ import com.uci.dao.service.HealthService;
 @Configuration
 public class AppConfigInbound {
 	@Value("${spring.kafka.bootstrap-servers}")
-    	private String BOOTSTRAP_SERVERS;
+    private String BOOTSTRAP_SERVERS;
 	
 	@Value("${spring.redis.database}")
 	private String redisDb;

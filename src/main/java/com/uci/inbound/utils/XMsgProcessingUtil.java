@@ -244,14 +244,11 @@ public class XMsgProcessingUtil {
                 .doOnError(genericError(String.format("Unable to find previous Message for userID %s", userID)))
                 .collectList()
                 .map(xMessageDAOS -> {
-                	if (xMessageDAOS.size() > 0) {
+                    if (xMessageDAOS.size() > 0) {
                         List<XMessageDAO> filteredList = new ArrayList<>();
                         for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                        	if (xMessageDAO.getMessageState().equals(messageState.name())) {
-                            	filteredList.add(xMessageDAO);
-                            	log.info("Selected xmessageDao");
-                            }
-                                
+                            if (xMessageDAO.getMessageState().equals(messageState.name()))
+                                filteredList.add(xMessageDAO);
                         }
                         if (filteredList.size() > 0) {
                             filteredList.sort(Comparator.comparing(XMessageDAO::getTimestamp));
@@ -372,23 +369,14 @@ public class XMsgProcessingUtil {
                 .map(new Function<List<XMessageDAO>, XMessageDAO>() {
                     @Override
                     public XMessageDAO apply(List<XMessageDAO> xMessageDAOS) {
-                    	log.info("xMsgDaos size: "+xMessageDAOS.size()+", messageState.name: "+XMessage.MessageState.SENT.name());
                         if (xMessageDAOS.size() > 0) {
                             List<XMessageDAO> filteredList = new ArrayList<>();
                             for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                            	log.info("xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
-                    			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
-                    			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
-                    			", timestamp: "+xMessageDAO.getTimestamp());
-                        
-                            	if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name())) {
-                            		filteredList.add(xMessageDAO);
-                            		log.info("selected xmsgDao");
-                            	}
-                                    
+                                if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name())
+                                        || xMessageDAO.getMessageState().equals(XMessage.MessageState.REPLIED.name()))
+                                    filteredList.add(xMessageDAO);
                             }
                             if (filteredList.size() > 0) {
-                            	log.info("in - filtered list size > 0");
                                 filteredList.sort(new Comparator<XMessageDAO>() {
                                     @Override
                                     public int compare(XMessageDAO o1, XMessageDAO o2) {
@@ -396,10 +384,6 @@ public class XMsgProcessingUtil {
                                     }
                                 });
                             }
-                            
-                            log.info("filteredList xMsgDao id: "+filteredList.get(0).getId());
-                            
-                            log.info("get 0: "+xMessageDAOS.get(0).getId());
                             return xMessageDAOS.get(0);
                         }
                         return new XMessageDAO();
