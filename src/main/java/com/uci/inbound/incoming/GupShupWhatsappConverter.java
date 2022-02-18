@@ -48,6 +48,9 @@ public class GupShupWhatsappConverter {
     
     @Autowired
     public RedisTemplate<String, Object> redisTemplate;
+    
+    @Value("{outbound}")
+    public String outboundTopic;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public void gupshupWhatsApp(@Valid GSWhatsAppMessage message) throws JsonProcessingException, JAXBException {
@@ -67,6 +70,7 @@ public class GupShupWhatsappConverter {
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
                 .redisTemplate(redisTemplate)
+                .topicOutbound(outboundTopic)
                 .build()
                 .process();
     }

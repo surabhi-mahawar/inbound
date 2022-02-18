@@ -46,6 +46,9 @@ public class DikshaWebController {
     
     @Autowired
     public RedisTemplate<String, Object> redisTemplate;
+    
+    @Value("{outbound}")
+    public String outboundTopic;
 
     @RequestMapping(value = "/web", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void dikshaWeb(@RequestBody SunbirdWebMessage message) throws JsonProcessingException, JAXBException {
@@ -64,6 +67,7 @@ public class DikshaWebController {
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
                 .redisTemplate(redisTemplate)
+                .topicOutbound(outboundTopic)
                 .build()
                 .process();
     }
