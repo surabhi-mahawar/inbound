@@ -47,7 +47,7 @@ public class DikshaWebController {
     @Autowired
     public RedisTemplate<String, Object> redisTemplate;
     
-    @Value("{outbound}")
+    @Value("${outbound}")
     public String outboundTopic;
 
     @RequestMapping(value = "/web", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)

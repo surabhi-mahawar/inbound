@@ -49,7 +49,7 @@ public class GupShupWhatsappConverter {
     @Autowired
     public RedisTemplate<String, Object> redisTemplate;
     
-    @Value("{outbound}")
+    @Value("${outbound}")
     public String outboundTopic;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)

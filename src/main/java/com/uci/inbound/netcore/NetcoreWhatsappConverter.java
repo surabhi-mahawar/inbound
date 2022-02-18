@@ -47,7 +47,7 @@ public class NetcoreWhatsappConverter {
     @Autowired
     public RedisTemplate<String, Object> redisTemplate;
     
-    @Value("{outbound}")
+    @Value("${outbound}")
     public String outboundTopic;
 
     @RequestMapping(value = "/whatsApp", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
