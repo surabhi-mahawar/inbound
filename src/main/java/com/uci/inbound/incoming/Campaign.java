@@ -47,7 +47,7 @@ public class Campaign {
 
     @RequestMapping(value = "/status/cdac/bulk", method = RequestMethod.GET)
     public TrackDetails getCampaignStatus(@RequestParam("campaignId") String campaignId) {
-        CdacBulkSmsAdapter iprovider = (CdacBulkSmsAdapter) factoryProvider.getProvider("cdac", "SMS");
+        CdacBulkSmsAdapter iprovider = (CdacBulkSmsAdapter) factoryProvider.getProvider("cdac", "SMS", null);
         try {
              iprovider.getLastTrackingReport(campaignId);
         } catch (Exception e) {
