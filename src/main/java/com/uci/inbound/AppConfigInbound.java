@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -22,7 +20,7 @@ import com.uci.dao.service.HealthService;
 @Configuration
 public class AppConfigInbound {
 	@Value("${spring.kafka.bootstrap-servers}")
-    private String BOOTSTRAP_SERVERS;
+    	private String BOOTSTRAP_SERVERS;
 	
 	@Value("${spring.redis.database}")
 	private String redisDb;
@@ -72,8 +70,6 @@ public class AppConfigInbound {
 	    jedisConFactory.setPort(port);
 	    Integer dbIndex = Integer.parseInt(redisDb);
 	    jedisConFactory.setDatabase(dbIndex);
-//		jedisConFactory.getPoolConfig().setMaxIdle(30);
-//		jedisConFactory.getPoolConfig().setMinIdle(10);
 	    return jedisConFactory;
 	}
 
@@ -83,7 +79,6 @@ public class AppConfigInbound {
 	    template.setConnectionFactory(jedisConnectionFactory());
 	    template.setKeySerializer(new StringRedisSerializer());
 	    template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-//	    template.setEnableTransactionSupport(true);
 	    return template;
 	}
 }
