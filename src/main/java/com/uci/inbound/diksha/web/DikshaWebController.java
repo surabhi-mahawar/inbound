@@ -7,6 +7,7 @@ import com.uci.adapter.sunbird.web.inbound.SunbirdWebMessage;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
+import com.uci.utils.cache.service.RedisCacheService;
 import com.uci.utils.kafka.SimpleProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class DikshaWebController {
     public BotService botService;
     
     @Autowired
-    public RedisTemplate<String, Object> redisTemplate;
+    public RedisCacheService redisCacheService;
     
     @Value("${outbound}")
     public String outboundTopic;
@@ -66,7 +67,7 @@ public class DikshaWebController {
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
-                .redisTemplate(redisTemplate)
+                .redisCacheService(redisCacheService)
                 .topicOutbound(outboundTopic)
                 .build()
                 .process();

@@ -12,6 +12,7 @@ import com.uci.dao.repository.XMessageRepository;
 import com.uci.dao.utils.XMessageDAOUtils;
 import com.uci.utils.BotService;
 import com.uci.utils.bot.util.BotUtil;
+import com.uci.utils.cache.service.RedisCacheService;
 import com.uci.utils.kafka.SimpleProducer;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +49,7 @@ public class XMsgProcessingUtil {
     String topicFailure;
     String topicOutbound;
     BotService botService;
-    RedisTemplate<String, Object> redisTemplate;
-    HashOperations hashOperations;
+    RedisCacheService redisCacheService;
 
     public void process() throws JsonProcessingException {
 
@@ -356,10 +356,8 @@ public class XMsgProcessingUtil {
     }
     
     private Mono<XMessageDAO> getLatestXMessage(String userID, LocalDateTime yesterday, String messageState) {
-    	hashOperations = redisTemplate.opsForHash();
-        XMessageDAO xMessageDAO = (XMessageDAO)hashOperations.get(redisKeyWithPrefix("XMessageDAO"), redisKeyWithPrefix(userID));
+    	XMessageDAO xMessageDAO = (XMessageDAO) redisCacheService.getXMessageDaoCache(userID);
 	  	if(xMessageDAO != null) {
-	  		log.info("redis key: "+redisKeyWithPrefix("XMessageDAO")+", "+redisKeyWithPrefix(userID));
 	  		log.info("Redis xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
 			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
 			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
@@ -405,9 +403,5 @@ public class XMsgProcessingUtil {
                         return new XMessageDAO();
                     }
                 });
-    }
-    
-    private String redisKeyWithPrefix(String key) {
-    	return System.getenv("ENV")+"-"+key;
     }
 }

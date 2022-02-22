@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.uci.dao.service.HealthService;
+import com.uci.utils.cdn.samagra.MinioClientService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +26,9 @@ public class HealthController {
 	@Autowired
 	private HealthService healthService;
 	
+	@Autowired
+	private MinioClientService minioClientService;
+	
     @RequestMapping(value = "/health", method = RequestMethod.GET, produces = { "application/json", "text/json" })
     public ResponseEntity<JsonNode> statusCheck() throws JsonProcessingException, IOException {
         log.error("Health API called");
@@ -33,6 +37,10 @@ public class HealthController {
         LocalDateTime localNow = LocalDateTime.now();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
         String dateString = fmt.format(localNow).toString();
+        
+        String signedUrl = minioClientService.getCdnSignedUrl("bot-audio.mp3");
+        log.info("signedUrl: "+signedUrl);
+        
         
         JsonNode jsonNode = mapper.readTree("{\"id\":\"api.content.health\",\"ver\":\"3.0\",\"ts\":\"2021-06-26T22:47:05Z+05:30\",\"params\":{\"resmsgid\":\"859fee0c-94d6-4a0d-b786-2025d763b78a\",\"msgid\":null,\"err\":null,\"status\":\"successful\",\"errmsg\":null},\"responseCode\":\"OK\",\"result\":{\"checks\":[{\"name\":\"redis cache\",\"healthy\":true},{\"name\":\"graph db\",\"healthy\":true},{\"name\":\"cassandra db\",\"healthy\":true}],\"healthy\":true}}");
         

@@ -6,6 +6,7 @@ import javax.xml.bind.JAXBException;
 import com.uci.adapter.gs.whatsapp.GupShupWhatsappAdapter;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
+import com.uci.utils.cache.service.RedisCacheService;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.utils.kafka.SimpleProducer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class GupShupWhatsappConverter {
     public BotService botService; 
     
     @Autowired
-    public RedisTemplate<String, Object> redisTemplate;
+    public RedisCacheService redisCacheService;
     
     @Value("${outbound}")
     public String outboundTopic;
@@ -69,7 +70,7 @@ public class GupShupWhatsappConverter {
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
-                .redisTemplate(redisTemplate)
+                .redisCacheService(redisCacheService)
                 .topicOutbound(outboundTopic)
                 .build()
                 .process();
