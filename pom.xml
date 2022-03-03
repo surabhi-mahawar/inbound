@@ -108,18 +108,19 @@
 			<version>1.0</version>
 			<scope>compile</scope>
 		</dependency>
+		<!-- Minio CDN Dependencies - Start -->
 		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-redis</artifactId>
-			<version>2.3.3.RELEASE</version>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>8.3.6</version>
 		</dependency>
-
+		<!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
 		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>3.3.0</version>
-			<type>jar</type>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>4.9.3</version>
 		</dependency>
+		<!-- Minio CDN Dependencies - End -->
 
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
@@ -127,14 +128,11 @@
 			<version>8.4.0</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.azure/azure-storage-blob -->
 		<dependency>
 			<groupId>com.azure</groupId>
 			<artifactId>azure-storage-blob</artifactId>
 			<version>12.10.2</version>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>

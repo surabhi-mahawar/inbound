@@ -8,6 +8,8 @@ import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.kafka.SimpleProducer;
 import lombok.extern.slf4j.Slf4j;
 import com.uci.utils.BotService;
+import com.uci.utils.cache.service.RedisCacheService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,7 +47,7 @@ public class NetcoreWhatsappConverter {
     public BotService botService;
     
     @Autowired
-    public RedisTemplate<String, Object> redisTemplate;
+    public RedisCacheService redisCacheService;
     
     @Value("${outbound}")
     public String outboundTopic;
@@ -67,7 +69,7 @@ public class NetcoreWhatsappConverter {
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
-                .redisTemplate(redisTemplate)
+                .redisCacheService(redisCacheService)
                 .topicOutbound(outboundTopic)
                 .build()
                 .process();
