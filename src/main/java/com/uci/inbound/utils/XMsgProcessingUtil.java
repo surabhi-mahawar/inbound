@@ -12,6 +12,7 @@ import com.uci.dao.repository.XMessageRepository;
 import com.uci.dao.utils.XMessageDAOUtils;
 import com.uci.utils.BotService;
 import com.uci.utils.bot.util.BotUtil;
+import com.uci.utils.cache.service.RedisCacheService;
 import com.uci.utils.kafka.SimpleProducer;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +49,7 @@ public class XMsgProcessingUtil {
     String topicFailure;
     String topicOutbound;
     BotService botService;
-    RedisTemplate<String, Object> redisTemplate;
-    HashOperations hashOperations;
+    RedisCacheService redisCacheService;
 
     public void process() throws JsonProcessingException {
 
@@ -244,11 +244,14 @@ public class XMsgProcessingUtil {
                 .doOnError(genericError(String.format("Unable to find previous Message for userID %s", userID)))
                 .collectList()
                 .map(xMessageDAOS -> {
-                    if (xMessageDAOS.size() > 0) {
+                	if (xMessageDAOS.size() > 0) {
                         List<XMessageDAO> filteredList = new ArrayList<>();
                         for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                            if (xMessageDAO.getMessageState().equals(messageState.name()))
-                                filteredList.add(xMessageDAO);
+                        	if (xMessageDAO.getMessageState().equals(messageState.name())) {
+                            	filteredList.add(xMessageDAO);
+                            	log.info("Selected xmessageDao");
+                            }
+                                
                         }
                         if (filteredList.size() > 0) {
                             filteredList.sort(Comparator.comparing(XMessageDAO::getTimestamp));
@@ -353,10 +356,8 @@ public class XMsgProcessingUtil {
     }
     
     private Mono<XMessageDAO> getLatestXMessage(String userID, LocalDateTime yesterday, String messageState) {
-    	hashOperations = redisTemplate.opsForHash();
-    	log.info("Finding redis cache with key: "+redisKeyWithPrefix("XMessageDAO")+", "+redisKeyWithPrefix(userID));
-    	XMessageDAO xMessageDAO = (XMessageDAO)hashOperations.get(redisKeyWithPrefix("XMessageDAO"), redisKeyWithPrefix(userID));
-        if(xMessageDAO != null) {
+    	XMessageDAO xMessageDAO = (XMessageDAO) redisCacheService.getXMessageDaoCache(userID);
+	  	if(xMessageDAO != null) {
 	  		log.info("Redis xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
 			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
 			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
@@ -369,14 +370,24 @@ public class XMsgProcessingUtil {
                 .map(new Function<List<XMessageDAO>, XMessageDAO>() {
                     @Override
                     public XMessageDAO apply(List<XMessageDAO> xMessageDAOS) {
+                    	log.info("xMsgDaos size: "+xMessageDAOS.size()+", messageState.name: "+XMessage.MessageState.SENT.name());
                         if (xMessageDAOS.size() > 0) {
                             List<XMessageDAO> filteredList = new ArrayList<>();
                             for (XMessageDAO xMessageDAO : xMessageDAOS) {
-                                if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name())
-                                        || xMessageDAO.getMessageState().equals(XMessage.MessageState.REPLIED.name()))
-                                    filteredList.add(xMessageDAO);
+                            	log.info("xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
+                    			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
+                    			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
+                    			", timestamp: "+xMessageDAO.getTimestamp());
+                        
+                            	if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name()) 
+					|| xMessageDAO.getMessageState().equals(XMessage.MessageState.REPLIED.name())) {
+                            		filteredList.add(xMessageDAO);
+                            		log.info("selected xmsgDao");
+                            	}
+                                    
                             }
                             if (filteredList.size() > 0) {
+                            	log.info("in - filtered list size > 0");
                                 filteredList.sort(new Comparator<XMessageDAO>() {
                                     @Override
                                     public int compare(XMessageDAO o1, XMessageDAO o2) {
@@ -384,14 +395,14 @@ public class XMsgProcessingUtil {
                                     }
                                 });
                             }
+                            
+                            log.info("filteredList xMsgDao id: "+filteredList.get(0).getId());
+                            
+                            log.info("get 0: "+xMessageDAOS.get(0).getId());
                             return xMessageDAOS.get(0);
                         }
                         return new XMessageDAO();
                     }
                 });
-    }
-    
-    private String redisKeyWithPrefix(String key) {
-    	return System.getenv("ENV")+"-"+key;
     }
 }
