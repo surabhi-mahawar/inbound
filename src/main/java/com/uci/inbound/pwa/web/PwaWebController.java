@@ -7,6 +7,7 @@ import com.uci.adapter.pwa.web.inbound.PwaWebMessage;
 import com.uci.inbound.utils.XMsgProcessingUtil;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
+import com.uci.utils.cache.service.RedisCacheService;
 import com.uci.utils.kafka.SimpleProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class PwaWebController {
     public BotService botService;
     
     @Autowired
-    public RedisTemplate<String, Object> redisTemplate;
+    public RedisCacheService redisCacheService;
 
     @RequestMapping(value = "/web", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void dikshaWeb(@RequestBody PwaWebMessage message) throws JsonProcessingException, JAXBException {
@@ -63,7 +64,7 @@ public class PwaWebController {
                 .topicSuccess(inboundProcessed)
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
-                .redisTemplate(redisTemplate)
+                .redisCacheService(redisCacheService)
                 .build()
                 .process();
     }
