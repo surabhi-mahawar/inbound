@@ -187,15 +187,21 @@ public class XMsgProcessingUtil {
                         @Override
                         public Mono<Pair<Boolean, Object>> apply(JsonNode botNode) {
                         	log.info("validateBot botNode:"+botNode);
+                        	String appName1 = null;
                         	if(botNode != null && !botNode.path("result").isEmpty()) {
                         		String botValid= BotUtil.getBotValidFromJsonNode(botNode.path("result").path("data").get(0));
                             	if(!botValid.equals("true")) {
                             		return Mono.just(Pair.of(false, Pair.of(botNode.path("result").path("data").get(0), botValid)));
     							}
                             	
+                            	try {
+                            		JsonNode name = botNode.path("result").path("data").get(0).path("name");
+                                	appName1 = name.asText();
+                            	} catch (Exception e) {
+                            		log.error("Exception in validateBot: "+e.getMessage());
+                            	}	
                         	}
-                        	JsonNode name = botNode.path("result").path("data").get(0).path("name");
-                        	String appName1 = name.asText();
+                        	
                             return Mono.just(Pair.of(true, (appName1 == null || appName1.isEmpty()) ? "finalAppName" : appName1));
                         }
                     });
@@ -249,7 +255,6 @@ public class XMsgProcessingUtil {
                         for (XMessageDAO xMessageDAO : xMessageDAOS) {
                         	if (xMessageDAO.getMessageState().equals(messageState.name())) {
                             	filteredList.add(xMessageDAO);
-                            	log.info("Selected xmessageDao");
                             }
                                 
                         }
@@ -360,8 +365,7 @@ public class XMsgProcessingUtil {
 	  	if(xMessageDAO != null) {
 	  		log.info("Redis xMsgDao id: "+xMessageDAO.getId()+", dao app: "+xMessageDAO.getApp()
 			+", From id: "+xMessageDAO.getFromId()+", user id: "+xMessageDAO.getUserId()
-			+", xMessage: "+xMessageDAO.getXMessage()+", status: "+xMessageDAO.getMessageState()+
-			", timestamp: "+xMessageDAO.getTimestamp());
+			+", status: "+xMessageDAO.getMessageState()+", timestamp: "+xMessageDAO.getTimestamp());
 	  		return Mono.just(xMessageDAO);
 	  	}
         
@@ -381,7 +385,6 @@ public class XMsgProcessingUtil {
                         
                             	if (xMessageDAO.getMessageState().equals(XMessage.MessageState.SENT.name())) {
                             		filteredList.add(xMessageDAO);
-                            		log.info("selected xmsgDao");
                             	}
                                     
                             }
