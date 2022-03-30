@@ -59,6 +59,10 @@ public class XMsgProcessingUtil {
             adapter.convertMessageToXMsg(inboundMessage)
                     .doOnError(genericError("Error in converting to XMessage by Adapter"))
                     .subscribe(xmsg -> {
+                        if(xmsg.getPayload().getMedia() != null && xmsg.getPayload().getMedia().getText() == "" && xmsg.getPayload().getMedia().getText() == ""){
+                            log.info("invalid media");
+                            processInvalidMediaMessage(xmsg);
+                        }
                         getAppName(xmsg.getPayload().getText(), xmsg.getFrom())
                                 .subscribe(resultPair -> {
                                 	log.info("getAppName response:"+resultPair);
@@ -99,7 +103,24 @@ public class XMsgProcessingUtil {
             e.printStackTrace();
         }
     }
-    
+
+    /**
+     * process Invalid Media Message - send media invalid message to outbound to process
+     * @param xmsg
+     */
+    private void processInvalidMediaMessage(XMessage xmsg) {
+        XMessageDAO currentMessageToBeInserted = XMessageDAOUtils.convertXMessageToDAO(xmsg);
+        xMsgRepo.insert(currentMessageToBeInserted)
+                .doOnError(genericError("Error in inserting current message"))
+                .subscribe(xMessageDAO -> {
+                    SenderReceiverInfo to = SenderReceiverInfo.builder().userID(xmsg.getFrom().getUserID()).build();
+                    xmsg.setTo(to);
+                    XMessagePayload payload = XMessagePayload.builder().text("Invalid-Media").build();
+                    xmsg.setPayload(payload);
+                    sendEventToOutboundKafka(xmsg);
+                });
+    }
+
     /**
      * Process Bot Invalid Message - Send bot invalid message to outbound to process
      * @param xmsg
