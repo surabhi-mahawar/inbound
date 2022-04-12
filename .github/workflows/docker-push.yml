@@ -33,6 +33,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
         with:
           driver-opts: env.BUILDKIT_STEP_LOG_MAX_SIZE=10485760
+          version: v0.0.1
 
       - name: Build and push
         id: docker_build
