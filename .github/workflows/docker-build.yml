@@ -10,19 +10,44 @@ jobs:
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v1
+
+      - name: maven-settings-xml-action
+        uses: whelk-io/maven-settings-xml-action@v20
+        with:
+          servers: >
+            [
+              {
+                "id": "github-adapter",
+                "username": "${env.GITHUB_USERNAME}",
+                "password": "${env.GITHUB_TOKEN}"
+              },
+              {
+                "id": "github-utils",
+                "username": "${env.GITHUB_USERNAME}",
+                "password": "${env.GITHUB_TOKEN}"
+              },
+              {
+                "id": "github-dao",
+                "username": "${env.GITHUB_USERNAME}",
+                "password": "${env.GITHUB_TOKEN}"
+              }
+            ]
+          output_file: $GITHUB_WORKSPACE/settings.xml
+
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
       - name: Get the version
         id: vars
         run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
       - name: Build the tagged Docker image
-        run: docker build . --file Dockerfile --tag samagragovernance/inbound:v0.0.2
+        run: docker build . -s $GITHUB_WORKSPACE/settings.xml --file Dockerfile --tag samagragovernance/inbound:v0.0.2
       - name: Push the tagged Docker image
         run: docker push samagragovernance/inbound:v0.0.2
-      - name: Build the latest Docker image
-        run: docker build . --file Dockerfile --tag samagragovernance/inbound:latest
-      - name: Push the latest Docker image
-        run: docker push samagragovernance/inbound:latest
+        
+      # - name: Build the latest Docker image
+      #   run: docker build . -s $GITHUB_WORKSPACE/settings.xml --file Dockerfile --tag samagragovernance/inbound:latest
+      # - name: Push the latest Docker image
+      #   run: docker push samagragovernance/inbound:latest
 
       # - uses: actions/checkout@v2
       # - name: Build container image
