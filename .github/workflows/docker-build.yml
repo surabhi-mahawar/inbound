@@ -2,22 +2,37 @@ name: Docker
 
 on:
   push:
-    branches: [master, main, ghworkflow1]
+    branches: [ghworkflow]
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v2
-      - name: Build container image
-        run: docker build -t inbound .
-      - name: Launch container
-        run: docker run -dp 8000:8080 --env-file env.sample inbound
-        timeout-minutes: 5
-      - run: docker ps
-      - name: Wait for Service to start
-        run: while ! curl -s localhost:8000/health; do sleep 1; done
-        timeout-minutes: 1
-      - name: Check API health
-        run: curl -s localhost:8000/health
+      - uses: actions/checkout@v1
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+      - name: Get the version
+        id: vars
+        run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
+      - name: Build the tagged Docker image
+        run: docker build . --file Dockerfile --tag samagragovernance/inbound:v0.0.2
+      - name: Push the tagged Docker image
+        run: docker push samagragovernance/inbound:v0.0.2
+      - name: Build the latest Docker image
+        run: docker build . --file Dockerfile --tag samagragovernance/inbound:latest
+      - name: Push the latest Docker image
+        run: docker push samagragovernance/inbound:latest
+
+      # - uses: actions/checkout@v2
+      # - name: Build container image
+      #   run: docker build -t inbound .
+      # - name: Launch container
+      #   run: docker run -dp 8000:8080 --env-file env.sample inbound
+      #   timeout-minutes: 5
+      # - run: docker ps
+      # - name: Wait for Service to start
+      #   run: while ! curl -s localhost:8000/health; do sleep 1; done
+      #   timeout-minutes: 1
+      # - name: Check API health
+      #   run: curl -s localhost:8000/health
