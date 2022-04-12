@@ -1,7 +1,7 @@
 name: Build
 on:
   push:
-    branches: [main, master, ghworkflow]
+    branches: [main, master, ghworkflow1]
 jobs:
   build:
     name: Build

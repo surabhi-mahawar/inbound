@@ -2,7 +2,7 @@ name: Docker
 
 on:
   push:
-    branches: [master, main, ghworkflow]
+    branches: [master, main, ghworkflow1]
 
 jobs:
   build:
