@@ -1,0 +1,23 @@
+name: Docker
+
+on:
+  push:
+    branches: [master, main, ghworkflow]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build container image
+        run: docker build -t inbound .
+      - name: Launch container
+        run: docker run -dp 8000:8080 --env-file env.sample inbound
+        timeout-minutes: 5
+      - run: docker ps
+      - name: Wait for Service to start
+        run: while ! curl -s localhost:8000/health; do sleep 1; done
+        timeout-minutes: 1
+      - name: Check API health
+        run: curl -s localhost:8000/health
