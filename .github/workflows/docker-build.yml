@@ -32,7 +32,7 @@ jobs:
                 "password": "${env.GITHUB_TOKEN}"
               }
             ]
-          output_file: $GITHUB_WORKSPACE/settings.xml
+          output_file: /home/app/settings.xml
 
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
@@ -40,7 +40,7 @@ jobs:
         id: vars
         run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
       - name: Build the tagged Docker image
-        run: docker build . --file Dockerfile --build-arg GITHUB_WORKSPACE=$GITHUB_WORKSPACE --tag samagragovernance/inbound:v0.0.2
+        run: docker build . --file Dockerfile --tag samagragovernance/inbound:v0.0.2
       - name: Push the tagged Docker image
         run: docker push samagragovernance/inbound:v0.0.2
         
