@@ -4,11 +4,12 @@ ENV HOME=/home/app
 RUN mkdir -p $HOME
 WORKDIR $HOME
 ADD pom.xml $HOME
+RUN echo ${GITHUB_WORKSPACE}
 
-RUN mvn -s /home/app/settings.xml dependency:go-offline
+RUN mvn -s ${GITHUB_WORKSPACE}/settings.xml dependency:go-offline
 
 ADD /src $HOME/src
-RUN mvn package -s /home/app/settings.xml -DskipTests=true
+RUN mvn package -s ${GITHUB_WORKSPACE}/settings.xml -DskipTests=true
 
 # Package stage
 FROM openjdk:12-alpine
