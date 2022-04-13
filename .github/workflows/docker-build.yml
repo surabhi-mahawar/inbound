@@ -40,7 +40,7 @@ jobs:
         id: vars
         run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10})
       - name: Build the tagged Docker image
-        run: docker build . -s $GITHUB_WORKSPACE/settings.xml --file Dockerfile --tag samagragovernance/inbound:v0.0.2
+        run: docker build . --file Dockerfile --tag samagragovernance/inbound:v0.0.2
       - name: Push the tagged Docker image
         run: docker push samagragovernance/inbound:v0.0.2
         
