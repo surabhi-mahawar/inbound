@@ -1,3 +1,10 @@
+# Build stage
+FROM maven:3.6.0-jdk-11-slim AS build
+ENV HOME=/home/app
+RUN mkdir -p $HOME
+WORKDIR $HOME
+ADD pom.xml $HOME
+
 # Package stage
 FROM openjdk:12-alpine
 ENV HOME=/home/app

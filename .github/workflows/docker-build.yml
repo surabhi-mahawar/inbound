@@ -68,7 +68,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           cat $GITHUB_WORKSPACE/settings.xml
-          mvn -B verify -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+          mvn -s $GITHUB_WORKSPACE/settings.xml dependency:go-offline
+          mvn package -s $GITHUB_WORKSPACE/settings.xml -DskipTests=true
 
   docker-build:
     runs-on: ubuntu-20.04
