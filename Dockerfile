@@ -1,15 +1,3 @@
-# Build stage
-FROM maven:3.6.0-jdk-11-slim AS build
-ENV HOME=/home/app
-RUN mkdir -p $HOME
-WORKDIR $HOME
-ADD pom.xml $HOME
-
-RUN mvn -s /home/runner/work/inbound/inbound/settings.xml dependency:go-offline
-
-ADD /src $HOME/src
-RUN mvn package -s /home/runner/work/inbound/inbound/settings.xml -DskipTests=true
-
 # Package stage
 FROM openjdk:12-alpine
 ENV HOME=/home/app
