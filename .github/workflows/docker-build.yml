@@ -69,8 +69,7 @@ jobs:
         run: |
           cat $GITHUB_WORKSPACE/settings.xml
           mvn -s $GITHUB_WORKSPACE/settings.xml dependency:go-offline
-          ADD /src /home/app/src
-          mvn package -s $GITHUB_WORKSPACE/settings.xml -DskipTests=true
+          mvn clean install -s $GITHUB_WORKSPACE/settings.xml -DskipTests=true
 
   docker-build:
     runs-on: ubuntu-20.04
