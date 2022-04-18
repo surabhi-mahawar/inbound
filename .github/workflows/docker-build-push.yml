@@ -1,4 +1,4 @@
-name: Docker
+name: Docker Build & Push on Tag
 
 on:
   push:
@@ -27,11 +27,6 @@ jobs:
         env:
           RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
         run: docker push samagragovernance/inbound:$RELEASE_VERSION
-        
-      # - name: Build the latest Docker image
-      #   run: docker build . -s $GITHUB_WORKSPACE/settings.xml --file Dockerfile --tag samagragovernance/inbound:latest
-      # - name: Push the latest Docker image
-      #   run: docker push samagragovernance/inbound:latest
 
       # - uses: actions/checkout@v2
       # - name: Build container image

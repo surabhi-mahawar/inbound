@@ -1,7 +1,6 @@
-name: Build
-on:
-  push:
-    branches: [main, master, ghworkflow1]
+name: Build on Push & Pull Request
+on: [push, pull_request]
+
 jobs:
   build:
     name: Build
@@ -16,16 +15,6 @@ jobs:
         with:
           java-version: 11
           distribution: 'temurin'
-          server-id: github-message-rosa
-          server-username: GITHUB_USERNAME
-          server-password: GITHUB_TOKEN
-      
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
       
       - name: Cache Maven packages
         uses: actions/cache@v1
@@ -39,6 +28,11 @@ jobs:
         with:
           servers: >
             [
+              {
+                "id": "github-message-rosa",
+                "username": "${env.GITHUB_USERNAME}",
+                "password": "${env.GITHUB_TOKEN}"
+              },
               {
                 "id": "github-adapter",
                 "username": "${env.GITHUB_USERNAME}",
