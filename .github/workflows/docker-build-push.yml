@@ -6,7 +6,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  docker-build:
+  docker-build-push:
     runs-on: ubuntu-20.04
     timeout-minutes: 40
     steps:
