@@ -1,0 +1,21 @@
+name: Docker Build on Push & Pull Request
+
+on: [push, pull_request]
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 40
+    steps:
+      - name: Build the tagged Docker image
+        run: |
+          docker build . --file Dockerfile --build-arg username=${{ secrets.USERNAME }} --build-arg token=${{ secrets.TOKEN }} --tag samagragovernance/inbound:vt0.0.1
+      - name: Launch container
+        run: docker run -dp 8000:8080 --env-file env.sample inbound
+        timeout-minutes: 5
+      - run: docker ps
+      - name: Wait for Service to start
+        run: while ! curl -s localhost:8000/health; do sleep 1; done
+        timeout-minutes: 1
+      - name: Check API health
+        run: curl -s localhost:8000/health
