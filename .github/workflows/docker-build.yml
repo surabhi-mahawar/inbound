@@ -12,7 +12,7 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
       - name: Build the tagged Docker image
         run: |
-          docker build . --file Dockerfile --build-arg username=${{ secrets.USERNAME }} --build-arg token=${{ secrets.TOKEN }} --tag samagragovernance/inbound:vt0.0.1
+          docker build . --file Dockerfile --build-arg username=${{ secrets.USERNAME }} --build-arg token=${{ secrets.TOKEN }} --tag inbound
       - name: Launch container
         run: docker run -dp 8000:8080 --env-file env.sample inbound
         timeout-minutes: 5
