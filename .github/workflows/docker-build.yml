@@ -3,10 +3,13 @@ name: Docker Build on Push & Pull Request
 on: [push, pull_request]
 
 jobs:
-  docker-build-push:
+  docker-build:
     runs-on: ubuntu-20.04
     timeout-minutes: 40
     steps:
+      - uses: actions/checkout@v1
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
       - name: Build the tagged Docker image
         run: |
           docker build . --file Dockerfile --build-arg username=${{ secrets.USERNAME }} --build-arg token=${{ secrets.TOKEN }} --tag samagragovernance/inbound:vt0.0.1
