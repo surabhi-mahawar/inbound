@@ -23,9 +23,10 @@ jobs:
         run: while ! curl -s localhost:8000/health; do sleep 1; done
         timeout-minutes: 1
       - name: Collect docker logs on failure
-          if: failure()
           uses: jwalton/gh-docker-logs@v1
           with:
-            dest: './logs'
+            images: 'inbound'
+            # Only show last 100 lines of each
+            tail: '100'
       - name: Check API health
         run: curl -s localhost:8000/health
