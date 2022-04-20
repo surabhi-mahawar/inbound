@@ -1,6 +1,8 @@
 name: Docker Build on Push & Pull Request
 
-on: [push, pull_request]
+on: 
+  push:
+    branches: [test]
 
 jobs:
   docker-build:
