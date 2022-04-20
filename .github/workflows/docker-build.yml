@@ -2,7 +2,7 @@ name: Docker Build on Push & Pull Request
 
 on: 
   push:
-    branches: [test]
+    branches: [ghworkflow]
 
 jobs:
   docker-build:
@@ -22,5 +22,10 @@ jobs:
       - name: Wait for Service to start
         run: while ! curl -s localhost:8000/health; do sleep 1; done
         timeout-minutes: 1
+      - name: Collect docker logs on failure
+          if: failure()
+          uses: jwalton/gh-docker-logs@v1
+          with:
+            dest: './logs'
       - name: Check API health
         run: curl -s localhost:8000/health
