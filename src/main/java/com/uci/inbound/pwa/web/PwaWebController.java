@@ -26,7 +26,6 @@ import javax.xml.bind.JAXBException;
 @RequestMapping(value = "/pwa")
 public class PwaWebController {
 
-
     @Value("${inboundProcessed}")
     private String inboundProcessed;
 
