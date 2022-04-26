@@ -60,5 +60,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
           cat $GITHUB_WORKSPACE/settings.xml
-          mvn -B verify -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+          mvn clean install -s $GITHUB_WORKSPACE/settings.xml -DskipTests
     
