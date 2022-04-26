@@ -48,7 +48,5 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ secrets.USERNAME }}
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        run: |
-          cat $GITHUB_WORKSPACE/settings.xml
-          mvn clean install -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+        run: mvn clean install -s $GITHUB_WORKSPACE/settings.xml -DskipTests
     
