@@ -44,9 +44,12 @@ public class PwaWebController {
 
     @Autowired
     public BotService botService;
-    
+
     @Autowired
     public RedisCacheService redisCacheService;
+
+    @Value("${outbound}")
+    public String outboundTopic;
 
     @RequestMapping(value = "/web", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public void dikshaWeb(@RequestBody PwaWebMessage message) throws JsonProcessingException, JAXBException {
@@ -65,6 +68,7 @@ public class PwaWebController {
                 .kafkaProducer(kafkaProducer)
                 .botService(botService)
                 .redisCacheService(redisCacheService)
+                .topicOutbound(outboundTopic)
                 .build()
                 .process();
     }
