@@ -104,4 +104,30 @@ public class ServiceStatusController {
     	JsonNode jsonNode = mapper.readTree("{\"id\":\"api.content.service.health\",\"ver\":\"3.0\",\"ts\":null,\"params\":{\"resmsgid\":null,\"msgid\":null,\"err\":null,\"status\":\"successful\",\"errmsg\":null},\"responseCode\":\"OK\",\"result\":{\"healthy\":false}}");
         return jsonNode;
     }
+
+    @RequestMapping(value = "/testUserSegment", method = RequestMethod.GET, produces = { "application/json", "text/json" })
+    public ResponseEntity<JsonNode> testUserSegment() throws JsonProcessingException, IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode arrayNode = mapper.createArrayNode();
+
+        ObjectNode data1 = mapper.createObjectNode();
+        data1.put("id", "1");
+        data1.put("phoneNo", "7597185708");
+        data1.put("name", "Surabhi");
+        data1.put("url", "http://google.com");
+
+        ObjectNode data2 = mapper.createObjectNode();
+        data2.put("id", "2");
+        data2.put("phoneNo", "9783246247");
+        data2.put("name", "Pankaj");
+        data2.put("url", "http://google.com");
+
+        arrayNode.addAll(Arrays.asList(data1, data2));
+
+        ObjectNode result = mapper.createObjectNode();
+        result.put("data", arrayNode);
+
+        return ResponseEntity.ok(result);
+    }
 }
