@@ -10,13 +10,17 @@ import com.uci.dao.models.XMessageDAO;
 import com.uci.dao.repository.XMessageRepository;
 import com.uci.utils.BotService;
 import com.uci.dao.service.HealthService;
+import com.uci.utils.cache.service.RedisCacheService;
 import com.uci.utils.kafka.KafkaConfig;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.web.bind.annotation.GetMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -36,6 +40,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ServiceStatusController {
 	@Autowired 
 	private HealthService healthService;
+
+    @Autowired
+    private RedisCacheService redisCacheService;
 
     @RequestMapping(value = "/health", method = RequestMethod.GET, produces = { "application/json", "text/json" })
     public ResponseEntity<JsonNode> statusCheck() throws JsonProcessingException {

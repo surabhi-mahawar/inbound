@@ -59,39 +59,42 @@ public class XMsgProcessingUtil {
             adapter.convertMessageToXMsg(inboundMessage)
                     .doOnError(genericError("Error in converting to XMessage by Adapter"))
                     .subscribe(xmsg -> {
-                        getAppName(xmsg.getPayload().getText(), xmsg.getFrom())
-                                .subscribe(resultPair -> {
-                                	log.info("getAppName response:"+resultPair);
-                                	/* If bot is invalid, send error message to outbound, else process message */
-                                    if(!resultPair.getLeft()) {
-                                    	log.info("Bot is invalid");
-                                    	processInvalidBotMessage(xmsg, (Pair<Object, String>) resultPair.getRight());
-                                    } else {
-                                    	Pair<Boolean, String> checkBotPair = (Pair<Boolean, String>) resultPair.getRight();
-                                    	/* If bot check required, validate bot, else process message */
-                                    	if(checkBotPair.getLeft()) {
-                                    		log.info("Bot check required.");
-                                    		validateBot(checkBotPair.getRight().toString())
-                                    			.subscribe(resPair -> {
-                                    				log.info("ValidateBot response:"+resPair);
-                                    				/* If bot is invalid, send error message to outbound, else process message */
-                                                    if(!resPair.getLeft()) {
-                                                    	log.info("Bot is invalid");
-                                                    	processInvalidBotMessage(xmsg, (Pair<Object, String>) resPair.getRight());
-                                                    } else {
-                                                    	log.info("Process bot message");
-                                                    	String appName = resPair.getRight().toString();
-                                                    	processBotMessage(xmsg, appName);
-                                                    }
-                                    			});
-                                    	} else {
-                                    		log.info("Process bot message");
-                                    		String appName = checkBotPair.getRight().toString();
-                                        	processBotMessage(xmsg, appName);
-                                    	}
-                                    }
-                                });
-
+//                        if(xmsg.getMessageState().equals("SENT") || xmsg.getMessageState().equals("DELIVERED")) {
+//
+//                        } else {
+                            getAppName(xmsg.getPayload().getText(), xmsg.getFrom())
+                                    .subscribe(resultPair -> {
+                                        log.info("getAppName response:"+resultPair);
+                                        /* If bot is invalid, send error message to outbound, else process message */
+                                        if(!resultPair.getLeft()) {
+                                            log.info("Bot is invalid");
+                                            processInvalidBotMessage(xmsg, (Pair<Object, String>) resultPair.getRight());
+                                        } else {
+                                            Pair<Boolean, String> checkBotPair = (Pair<Boolean, String>) resultPair.getRight();
+                                            /* If bot check required, validate bot, else process message */
+                                            if(checkBotPair.getLeft()) {
+                                                log.info("Bot check required.");
+                                                validateBot(checkBotPair.getRight().toString())
+                                                        .subscribe(resPair -> {
+                                                            log.info("ValidateBot response:"+resPair);
+                                                            /* If bot is invalid, send error message to outbound, else process message */
+                                                            if(!resPair.getLeft()) {
+                                                                log.info("Bot is invalid");
+                                                                processInvalidBotMessage(xmsg, (Pair<Object, String>) resPair.getRight());
+                                                            } else {
+                                                                log.info("Process bot message");
+                                                                String appName = resPair.getRight().toString();
+                                                                processBotMessage(xmsg, appName);
+                                                            }
+                                                        });
+                                            } else {
+                                                log.info("Process bot message");
+                                                String appName = checkBotPair.getRight().toString();
+                                                processBotMessage(xmsg, appName);
+                                            }
+                                        }
+                                    });
+//                        }
                     });
 
         } catch (JAXBException e) {
